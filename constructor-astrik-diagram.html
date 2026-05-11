@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constructor Astrik - Subproyecto de Agentes Autonomos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0e17;
+    color: #e0e6f0;
+    overflow-x: hidden;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(123,97,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(123,97,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  header {
+    position: relative; z-index: 1;
+    padding: 3rem 2rem 1.5rem; text-align: center;
+    background: linear-gradient(180deg, #0d1525 0%, transparent 100%);
+    border-bottom: 1px solid rgba(123,97,255,0.1);
+  }
+  header h1 {
+    font-size: 2.8rem; font-weight: 700;
+    background: linear-gradient(135deg, #7b61ff, #00c8ff, #1de9b6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  header .subtitle {
+    margin-top: 0.5rem; font-size: 1.1rem; color: #8899bb;
+  }
+  header .badge {
+    display: inline-block; padding: 0.2rem 0.8rem; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600;
+    border: 1px solid rgba(123,97,255,0.3); color: #7b61ff;
+    background: rgba(123,97,255,0.08); margin: 0 0.3rem;
+  }
+  nav.tabs {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center; gap: 0.25rem;
+    padding: 1rem 1rem 0; flex-wrap: wrap;
+  }
+  nav.tabs button {
+    padding: 0.6rem 1.4rem; border: 1px solid transparent; border-radius: 10px 10px 0 0;
+    background: transparent; color: #667799; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: all 0.25s; font-family: inherit;
+  }
+  nav.tabs button:hover { color: #aabbdd; background: rgba(255,255,255,0.03); }
+  nav.tabs button.active {
+    color: #7b61ff; background: rgba(123,97,255,0.06);
+    border-color: rgba(123,97,255,0.15) rgba(123,97,255,0.15) transparent;
+  }
+  main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+  .tab-content { display: none; animation: fadeIn 0.4s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-title {
+    font-size: 1.5rem; font-weight: 600; margin: 2rem 0 1rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .section-title .ico { font-size: 1.3rem; }
+  .section-desc { color: #8899bb; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+  .card-grid { display: grid; gap: 1rem; margin-bottom: 2rem; }
+  .card-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  .card-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .card-grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card {
+    background: rgba(20,30,50,0.6); border: 1px solid rgba(60,90,140,0.2);
+    border-radius: 14px; padding: 1.2rem 1.4rem;
+    backdrop-filter: blur(10px); transition: all 0.3s;
+  }
+  .card:hover { border-color: rgba(123,97,255,0.25); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(123,97,255,0.05); }
+  .card .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
+  .card .card-title .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .card .card-body { font-size: 0.85rem; color: #8899bb; line-height: 1.6; }
+  .card .card-body ul { list-style: none; padding: 0; margin-top: 0.4rem; }
+  .card .card-body ul li::before { content: "> "; color: #7b61ff; }
+  .card .card-body ul li { margin-bottom: 0.2rem; font-size: 0.82rem; }
+  .card .tag {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px;
+    font-size: 0.7rem; font-weight: 500; margin: 0.15rem;
+    background: rgba(123,97,255,0.1); color: #7b61ff; border: 1px solid rgba(123,97,255,0.15);
+  }
+  .card .tag-green { background: rgba(0,230,118,0.1); color: #00e676; border-color: rgba(0,230,118,0.15); }
+  .card .tag-blue { background: rgba(0,200,255,0.1); color: #00c8ff; border-color: rgba(0,200,255,0.15); }
+  .card .tag-pink { background: rgba(255,107,203,0.1); color: #ff6bcb; border-color: rgba(255,107,203,0.15); }
+
+  .arch-diagram {
+    background: rgba(15,22,40,0.8); border: 1px solid rgba(60,90,140,0.2);
+    border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;
+    display: flex; justify-content: center;
+  }
+  .arch-diagram svg { max-width: 100%; height: auto; }
+
+  .comparison-table {
+    width: 100%; border-collapse: collapse; margin: 1rem 0;
+    font-size: 0.85rem;
+  }
+  .comparison-table th, .comparison-table td {
+    padding: 0.7rem 1rem; text-align: left;
+    border-bottom: 1px solid rgba(60,90,140,0.2);
+  }
+  .comparison-table th { color: #7b61ff; font-weight: 600; background: rgba(123,97,255,0.05); }
+  .comparison-table tr:hover td { background: rgba(123,97,255,0.03); }
+  .comparison-table .winner { color: #00e676; font-weight: 600; }
+  .comparison-table .loser { color: #ff5252; }
+
+  .dot-purple { background: #7b61ff; }
+  .dot-blue { background: #00c8ff; }
+  .dot-green { background: #00e676; }
+  .dot-pink { background: #ff6bcb; }
+  .dot-orange { background: #ffab40; }
+  .dot-yellow { background: #ffd740; }
+  .dot-teal { background: #1de9b6; }
+
+  .improvement-box {
+    border-left: 3px solid #00e676;
+    padding: 0.8rem 1rem; margin: 0.5rem 0;
+    background: rgba(0,230,118,0.04); border-radius: 0 8px 8px 0;
+  }
+  .improvement-box.old { border-left-color: #ff5252; background: rgba(255,82,82,0.04); }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    nav.tabs button { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+    .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <h1>+ Constructor Astrik</h1>
+  <div class="subtitle">
+    <span>Subproyecto de Agentes Autonomos con LangGraph</span>
+    <span class="badge">v1.0</span>
+    <span class="badge">Diseno</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="overview">Vision General</button>
+  <button data-tab="langgraph">Orchestrator LangGraph</button>
+  <button data-tab="comparison">Comparativa</button>
+  <button data-tab="improvements">Mejoras</button>
+  <button data-tab="architecture">Arquitectura Final</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1: VISION GENERAL ============ -->
+<div class="tab-content active" id="tab-overview">
+  <div class="section-title"><span class="ico">[+]</span> Que es Constructor Astrik?</div>
+  <div class="section-desc">
+    Es el subproyecto que construye la infraestructura de agentes autonomos.
+    No es el proyecto final (Astrik AI Platform), es la <strong>fabrica</strong> que
+    va a construir ese proyecto final de forma automatica.
+  </div>
+
+  <div class="card-grid cols-2">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span> Objetivo</div>
+      <div class="card-body">
+        Construir agentes que funcionen por si solos, escuchen eventos,
+        tomen decisiones y ejecuten tareas sin intervencion manual.
+        <br><br>
+        <strong>Problema actual:</strong> Los agentes son scripts CLI.<br>
+        <strong>Solucion:</strong> Orchestrator con LangGraph + Event Bus NATS.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-green"></span> Arquitectura Target</div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:0.3rem;">
+          <div><span class="tag">LangGraph</span> Workflow engine + state machine</div>
+          <div><span class="tag">FastAPI</span> API REST</div>
+          <div><span class="tag">NATS</span> Event bus entre agentes</div>
+          <div><span class="tag">PostgreSQL</span> Persistencia de estado</div>
+          <div><span class="tag">Redis</span> Colas + cache</div>
+          <div><span class="tag">Qdrant</span> Memoria compartida</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="font-size:1.1rem;"><span class="ico">[~]</span> Componentes Actuales y su Evolucion</div>
+  <div class="card-grid cols-2">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-blue"></span> Agent Factory <span class="tag" style="margin-left:0.5rem;">v1.0.0</span></div>
+      <div class="card-body">
+        <strong>Hoy:</strong> Genera estructura de directorios + boilerplate CLI<br>
+        <strong style="color:#00e676;">Mejora:</strong> Generar stubs compatibles con LangGraph (nodos, tools, edges)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-pink"></span> Skills Agent <span class="tag" style="margin-left:0.5rem;">v1.0.0</span></div>
+      <div class="card-body">
+        <strong>Hoy:</strong> CLI que busca, instala y documenta herramientas<br>
+        <strong style="color:#00e676;">Mejora:</strong> Exponer sus capacidades como LangGraph tools (search_tool, install_tool)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-orange"></span> Infra Agent <span class="tag" style="margin-left:0.5rem;">v1.0.0</span></div>
+      <div class="card-body">
+        <strong>Hoy:</strong> Genera docker-compose.yml + .env + Dockerfiles<br>
+        <strong style="color:#00e676;">Mejora:</strong> Exponer tools Docker para LangGraph (deploy_service, check_health)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span> Versionado <span class="tag" style="margin-left:0.5rem;">v0.1.1</span></div>
+      <div class="card-body">
+        <strong>Hoy:</strong> Script release.py que crea snapshots + tags<br>
+        <strong style="color:#00e676;">Mejora:</strong> LangGraph tool de versionado integrada al workflow de release
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 2: LANGGRAPH ORCHESTRATOR ============ -->
+<div class="tab-content" id="tab-langgraph">
+  <div class="section-title"><span class="ico">[*]</span> Orchestrator con LangGraph</div>
+  <div class="section-desc">
+    LangGraph reemplaza el diseno manual de state machine, scheduler y workflow engine.
+    Todo se vuelve un grafo de nodos (agentes) conectados por aristas (eventos).
+  </div>
+
+  <div class="arch-diagram">
+    <svg viewBox="0 0 950 520" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+      <defs>
+        <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7b61ff"/><stop offset="100%" stop-color="#5a3ee0"/></linearGradient>
+        <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#0090cc"/></linearGradient>
+        <linearGradient id="lg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff6bcb"/><stop offset="100%" stop-color="#d040a0"/></linearGradient>
+        <linearGradient id="lg4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#00b85c"/></linearGradient>
+        <linearGradient id="lg5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffab40"/><stop offset="100%" stop-color="#d08020"/></linearGradient>
+        <linearGradient id="lg6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1de9b6"/><stop offset="100%" stop-color="#00b89c"/></linearGradient>
+        <linearGradient id="lgbg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1a2744"/><stop offset="100%" stop-color="#0d1525"/></linearGradient>
+        <filter id="sh"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/></filter>
+      </defs>
+      <rect x="0" y="0" width="950" height="520" rx="12" fill="url(#lgbg)" opacity="0.6"/>
+
+      <!-- Input -->
+      <rect x="350" y="20" width="250" height="44" rx="10" fill="url(#lg1)" filter="url(#sh)"/>
+      <text x="475" y="47" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">[Usuario] Objetivo del Usuario</text>
+      <line x1="475" y1="64" x2="475" y2="85" stroke="#7b61ff" stroke-width="2"/>
+
+      <!-- LangGraph State -->
+      <rect x="125" y="87" width="700" height="36" rx="8" fill="rgba(123,97,255,0.08)" stroke="#7b61ff" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="475" y="110" text-anchor="middle" fill="#7b61ff" font-size="11" font-weight="600">LANGGRAPH STATE: { task, status, agent, output, error, retries }</text>
+
+      <!-- Graph nodes -->
+      <rect x="60" y="140" width="180" height="52" rx="10" fill="url(#lg2)" filter="url(#sh)"/>
+      <text x="150" y="163" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">[Planner] Planner Node</text>
+      <text x="150" y="180" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Divide objetivo en tareas</text>
+
+      <rect x="280" y="140" width="180" height="52" rx="10" fill="url(#lg3)" filter="url(#sh)"/>
+      <text x="370" y="163" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">[Skills] Skills Node</text>
+      <text x="370" y="180" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Busca herramientas externas</text>
+
+      <rect x="500" y="140" width="180" height="52" rx="10" fill="url(#lg4)" filter="url(#sh)"/>
+      <text x="590" y="163" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">[Exec] Executor Node</text>
+      <text x="590" y="180" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Ejecuta codigo/configura</text>
+
+      <rect x="720" y="140" width="180" height="52" rx="10" fill="url(#lg5)" filter="url(#sh)"/>
+      <text x="810" y="163" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">[QA] Validator Node</text>
+      <text x="810" y="180" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">QA y validacion</text>
+
+      <!-- Edges between nodes -->
+      <line x1="240" y1="166" x2="278" y2="166" stroke="#00c8ff" stroke-width="1.5"/>
+      <line x1="460" y1="166" x2="498" y2="166" stroke="#ff6bcb" stroke-width="1.5"/>
+      <line x1="680" y1="166" x2="718" y2="166" stroke="#00e676" stroke-width="1.5"/>
+
+      <!-- Arrow down to tools -->
+      <line x1="150" y1="192" x2="150" y2="220" stroke="#00c8ff" stroke-width="1.5"/>
+      <line x1="370" y1="192" x2="370" y2="220" stroke="#ff6bcb" stroke-width="1.5"/>
+      <line x1="590" y1="192" x2="590" y2="220" stroke="#00e676" stroke-width="1.5"/>
+      <line x1="810" y1="192" x2="810" y2="220" stroke="#ffab40" stroke-width="1.5"/>
+
+      <!-- Tools layer -->
+      <rect x="30" y="222" width="890" height="36" rx="8" fill="rgba(0,200,255,0.05)" stroke="#00c8ff" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="475" y="244" text-anchor="middle" fill="#00c8ff" font-size="10">TOOLS COMPARTIDAS: version_tool | docker_tool | github_search | filesystem_tool | model_query</text>
+
+      <!-- Arrow down to agents -->
+      <line x1="150" y1="258" x2="150" y2="280" stroke="#00c8ff" stroke-width="1.5"/>
+      <line x1="370" y1="258" x2="370" y2="280" stroke="#ff6bcb" stroke-width="1.5"/>
+      <line x1="590" y1="258" x2="590" y2="280" stroke="#00e676" stroke-width="1.5"/>
+      <line x1="810" y1="258" x2="810" y2="280" stroke="#ffab40" stroke-width="1.5"/>
+
+      <!-- Agents row -->
+      <rect x="60" y="283" width="180" height="52" rx="10" fill="rgba(255,107,203,0.06)" stroke="#ff6bcb" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="150" y="303" text-anchor="middle" fill="#ff6bcb" font-weight="600" font-size="10">Skills Agent</text>
+      <text x="150" y="318" text-anchor="middle" fill="#667799" font-size="8">search_github | install</text>
+
+      <rect x="280" y="283" width="180" height="52" rx="10" fill="rgba(255,171,64,0.06)" stroke="#ffab40" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="370" y="303" text-anchor="middle" fill="#ffab40" font-weight="600" font-size="10">Infra Agent</text>
+      <text x="370" y="318" text-anchor="middle" fill="#667799" font-size="8">docker | compose | health</text>
+
+      <rect x="500" y="283" width="180" height="52" rx="10" fill="rgba(0,230,118,0.06)" stroke="#00e676" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="590" y="303" text-anchor="middle" fill="#00e676" font-weight="600" font-size="10">Factory Agent</text>
+      <text x="590" y="318" text-anchor="middle" fill="#667799" font-size="8">create_agent | validate</text>
+
+      <rect x="720" y="283" width="180" height="52" rx="10" fill="rgba(0,200,255,0.06)" stroke="#00c8ff" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="810" y="303" text-anchor="middle" fill="#00c8ff" font-weight="600" font-size="10">Version Agent</text>
+      <text x="810" y="318" text-anchor="middle" fill="#667799" font-size="8">snapshot | bump | tag</text>
+
+      <!-- Arrow down to output -->
+      <line x1="150" y1="335" x2="150" y2="355" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+      <line x1="370" y1="335" x2="370" y2="355" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+      <line x1="590" y1="335" x2="590" y2="355" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+      <line x1="810" y1="335" x2="810" y2="355" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+
+      <!-- NATS Event Bus -->
+      <rect x="60" y="358" width="830" height="36" rx="8" fill="rgba(123,97,255,0.06)" stroke="#7b61ff" stroke-width="1"/>
+      <text x="475" y="380" text-anchor="middle" fill="#7b61ff" font-size="11" font-weight="600">NATS EVENT BUS: TASK_CREATED | TASK_COMPLETED | TASK_FAILED | WORKFLOW_FINISHED</text>
+
+      <!-- Arrow to persist -->
+      <line x1="475" y1="394" x2="475" y2="410" stroke="#7b61ff" stroke-width="1.5"/>
+
+      <!-- Persistence -->
+      <rect x="60" y="412" width="250" height="38" rx="8" fill="rgba(0,200,255,0.04)" stroke="#00c8ff" stroke-width="0.8"/>
+      <text x="185" y="435" text-anchor="middle" fill="#00c8ff" font-size="9.5">PostgreSQL (checkpoints)</text>
+
+      <rect x="350" y="412" width="250" height="38" rx="8" fill="rgba(0,230,118,0.04)" stroke="#00e676" stroke-width="0.8"/>
+      <text x="475" y="435" text-anchor="middle" fill="#00e676" font-size="9.5">Redis (colas + cache)</text>
+
+      <rect x="640" y="412" width="250" height="38" rx="8" fill="rgba(255,107,203,0.04)" stroke="#ff6bcb" stroke-width="0.8"/>
+      <text x="765" y="435" text-anchor="middle" fill="#ff6bcb" font-size="9.5">Qdrant (memoria vectorial)</text>
+
+      <!-- Reflexive edge: loop back -->
+      <path d="M 810 192 Q 900 192 900 300 Q 900 340 830 355" stroke="#ff5252" stroke-width="1.2" stroke-dasharray="4,3" fill="none" opacity="0.5"/>
+      <text x="915" y="260" fill="#ff5252" font-size="8" transform="rotate(90,915,260)">retry / error</text>
+
+      <!-- Metadata -->
+      <text x="30" y="490" fill="#667799" font-size="8">LangGraph: StateGraph con nodes, edges, conditional edges. Checkpointing automatico en PostgreSQL.</text>
+      <text x="30" y="505" fill="#667799" font-size="8">Cada nodo es un agente LangGraph que hereda de AgentNode. Tools se registran en el grafo global.</text>
+    </svg>
+  </div>
+
+  <div class="section-title" style="font-size:1.1rem;"><span class="ico">[+]</span> Estructura Propuesta del Orchestrator</div>
+  <div class="arch-diagram" style="justify-content:flex-start;padding:1rem 2rem;font-family:'Consolas','Courier New',monospace;font-size:0.82rem;line-height:1.8;">
+    <pre style="color:#8899bb;">
+<span style="color:#7b61ff;font-weight:600;">orchestrator/</span>
++-- <span style="color:#00c8ff;">graph.py</span>              <span style="color:#667799;"># StateGraph: nodos, aristas, edges condicionales</span>
++-- <span style="color:#00c8ff;">state.py</span>             <span style="color:#667799;"># TypedDict del estado del grafo</span>
++-- <span style="color:#00c8ff;">server.py</span>            <span style="color:#667799;"># FastAPI wrapper del grafo</span>
++-- <span style="color:#00c8ff;">config.py</span>            <span style="color:#667799;"># Configuracion desde .env</span>
++-- <span style="color:#00c8ff;">db.py</span>                <span style="color:#667799;"># SQLAlchemy async + LangGraph checkpointer</span>
++-- <span style="color:#00c8ff;">events.py</span>            <span style="color:#667799;"># NATS: publicar eventos del grafo</span>
++-- <span style="color:#ff6bcb;">nodes/</span>
+|   +-- <span style="color:#00e676;">planner.py</span>          <span style="color:#667799;"># Nodo: recibe objetivo, descompone</span>
+|   +-- <span style="color:#00e676;">executor.py</span>         <span style="color:#667799;"># Nodo: ejecuta tools/agentes</span>
+|   +-- <span style="color:#00e676;">validator.py</span>        <span style="color:#667799;"># Nodo: QA y validacion</span>
+|   +-- <span style="color:#00e676;">deployer.py</span>         <span style="color:#667799;"># Nodo: deploy y release</span>
++-- <span style="color:#ff6bcb;">agents/</span>
+|   +-- <span style="color:#00e676;">factory_agent.py</span>    <span style="color:#667799;"># LangGraph AgentNode</span>
+|   +-- <span style="color:#00e676;">skills_agent.py</span>     <span style="color:#667799;"># LangGraph AgentNode</span>
+|   +-- <span style="color:#00e676;">infra_agent.py</span>      <span style="color:#667799;"># LangGraph AgentNode</span>
+|   +-- <span style="color:#00e676;">version_agent.py</span>    <span style="color:#667799;"># LangGraph AgentNode</span>
++-- <span style="color:#ff6bcb;">tools/</span>
+|   +-- <span style="color:#00e676;">github_search.py</span>    <span style="color:#667799;"># Tool: buscar en GitHub</span>
+|   +-- <span style="color:#00e676;">docker_ops.py</span>       <span style="color:#667799;"># Tool: operaciones Docker</span>
+|   +-- <span style="color:#00e676;">filesystem.py</span>       <span style="color:#667799;"># Tool: sistema de archivos</span>
+|   +-- <span style="color:#00e676;">versioning.py</span>       <span style="color:#667799;"># Tool: versionado</span>
+|   +-- <span style="color:#00e676;">model_query.py</span>      <span style="color:#667799;"># Tool: consultar llama.cpp</span>
++-- <span style="color:#ff6bcb;">events/</span>
+|   +-- <span style="color:#00e676;">publisher.py</span>        <span style="color:#667799;"># Publicar eventos NATS</span>
+|   +-- <span style="color:#00e676;">subscriber.py</span>       <span style="color:#667799;"># Escuchar eventos NATS</span>
++-- docs/
++-- tests/
+    </pre>
+  </div>
+</div>
+
+<!-- ============ TAB 3: COMPARATIVA ============ -->
+<div class="tab-content" id="tab-comparison">
+  <div class="section-title"><span class="ico">[!]</span> Hecho a Medida vs LangGraph</div>
+  <div class="section-desc">Comparacion directa entre el diseno original (FastAPI + state machine manual) y LangGraph.</div>
+
+  <table class="comparison-table">
+    <thead>
+      <tr><th style="width:20%;">Componente</th><th style="width:40%;">Diseno Original (FastAPI puro)</th><th style="width:40%;">LangGraph</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>State Machine</strong></td>
+        <td class="loser">Implementar manual con clases + enum + transiciones</td>
+        <td class="winner">Built-in: StateGraph con nodos y aristas. Checkpointing automatico.</td>
+      </tr>
+      <tr>
+        <td><strong>Workflow DAG</strong></td>
+        <td class="loser">Router manual con if/else + cola Redis</td>
+        <td class="winner">Natural: aristas condicionales entre nodos. Routing implicito.</td>
+      </tr>
+      <tr>
+        <td><strong>Persistencia</strong></td>
+        <td class="loser">SQLAlchemy + tablas task/workflow/agent manuales</td>
+        <td class="winner">Checkpointer: guarda/restaura estado automaticamente en PostgreSQL</td>
+      </tr>
+      <tr>
+        <td><strong>Agentes</strong></td>
+        <td class="loser">Router manual que invoca agentes por CLI</td>
+        <td class="winner">AgentNode: wrapper LangGraph que usa modelos + tools nativamente</td>
+      </tr>
+      <tr>
+        <td><strong>Tools</strong></td>
+        <td class="loser">Funciones sueltas sin registro central</td>
+        <td class="winner">Tool registry: tools decoradas, disponibles para cualquier nodo</td>
+      </tr>
+      <tr>
+        <td><strong>Streaming</strong></td>
+        <td class="loser">Implementar con WebSockets + asyncio.Queue</td>
+        <td class="winner">Nativo: streaming de eventos del grafo en tiempo real</td>
+      </tr>
+      <tr>
+        <td><strong>Retry / Error</strong></td>
+        <td class="loser">Mecanismo manual con contadores + colas</td>
+        <td class="winner">Built-in: nodos pueden tener aristas de error + limite de reintentos</td>
+      </tr>
+      <tr>
+        <td><strong>Human-in-loop</strong></td>
+        <td class="loser">Implementar con endpoints + webhooks</td>
+        <td class="winner">Nativo: interrupt() pausea el grafo, espera input humano</td>
+      </tr>
+      <tr>
+        <td><strong>Codigo estimado</strong></td>
+        <td class="loser">~2000 lineas (solo scaffolding)</td>
+        <td class="winner">~300 lineas (logica de dominio pura)</td>
+      </tr>
+      <tr>
+        <td><strong>Mantenimiento</strong></td>
+        <td class="loser">Alto: cada cambio en workflow = cambiar state machine</td>
+        <td class="winner">Bajo: agregar/quitar nodos = agregar/quitar edges</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card-grid cols-2" style="margin-top:1rem;">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-green"></span> Veredicto</div>
+      <div class="card-body">
+        LangGraph es <strong>superior</strong> para este proyecto porque:
+        <ul>
+          <li>Elimina ~80% del codigo de infraestructura</li>
+          <li>Ya resuelve state machine, persistencia, streaming, retry</li>
+          <li>Es el estandar de facto para sistemas multi-agente</li>
+          <li>Nos deja enfocar en logica de dominio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-orange"></span> Riesgo</div>
+      <div class="card-body">
+        LangGraph <strong>depende de LangChain</strong>, que es pesado (~200MB con dependencias).
+        Si en el futuro LangChain cambia, LangGraph puede romperse.
+        <br><br>
+        <strong>Mitigacion:</strong> Nuestra logica de negocio vive en <code>tools/</code> y <code>agents/</code>,
+        no en LangGraph. Si cambia, solo refactorizar <code>graph.py</code>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 4: MEJORAS ============ -->
+<div class="tab-content" id="tab-improvements">
+  <div class="section-title"><span class="ico">[+]</span> Mejoras Propuestas a Componentes Existentes</div>
+  <div class="section-desc">Cada componente actual se puede convertir en un LangGraph AgentNode con tools registradas.</div>
+
+  <div class="improvement-box old">
+    <strong style="color:#ff5252;">[ANTES] Agent Factory (Hoy)</strong> - Genera estructura de directorios + boilerplate CLI
+  </div>
+  <div class="improvement-box">
+    <strong style="color:#00e676;">[DESPUES] Agent Factory (Mejora)</strong><br>
+    Ademas de lo actual, generar stubs LangGraph:
+    <div style="margin-top:0.3rem;font-size:0.82rem;color:#aabbcc;">
+      - Nodo LangGraph en <code>nodes/&lt;agent&gt;.py</code><br>
+      - Herramientas LangGraph en <code>tools/&lt;tool&gt;.py</code><br>
+      - Registro de herramientas en el grafo global<br>
+      - Tests de nodo LangGraph
+    </div>
+  </div>
+
+  <br>
+
+  <div class="improvement-box old">
+    <strong style="color:#ff5252;">[ANTES] Skills Agent (Hoy)</strong> - CLI independiente, no integrable al workflow
+  </div>
+  <div class="improvement-box">
+    <strong style="color:#00e676;">[DESPUES] Skills Agent (Mejora)</strong><br>
+    Exponer tools LangGraph:
+    <div style="margin-top:0.3rem;font-size:0.82rem;color:#aabbcc;">
+      - <code>search_github_tool(query) -&gt; list[dict]</code><br>
+      - <code>evaluate_tool(candidate) -&gt; dict</code> (score, verdict)<br>
+      - <code>install_tool(name, type) -&gt; dict</code> (status, path)<br>
+      - <code>test_tool(name) -&gt; dict</code> (working/failing)<br>
+      - Se registran en <code>orchestrator/tools/github_search.py</code>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="improvement-box old">
+    <strong style="color:#ff5252;">[ANTES] Infra Agent (Hoy)</strong> - CLI independiente, no integrable al workflow
+  </div>
+  <div class="improvement-box">
+    <strong style="color:#00e676;">[DESPUES] Infra Agent (Mejora)</strong><br>
+    Exponer tools Docker:
+    <div style="margin-top:0.3rem;font-size:0.82rem;color:#aabbcc;">
+      - <code>deploy_service(compose_path) -&gt; dict</code><br>
+      - <code>check_health(service) -&gt; dict</code><br>
+      - <code>generate_compose(services) -&gt; str</code> (path)<br>
+      - <code>add_service(name, config) -&gt; dict</code><br>
+      - Se registran en <code>orchestrator/tools/docker_ops.py</code>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="improvement-box old">
+    <strong style="color:#ff5252;">[ANTES] Versionado (Hoy)</strong> - Script CLI release.py
+  </div>
+  <div class="improvement-box">
+    <strong style="color:#00e676;">[DESPUES] Versionado (Mejora)</strong><br>
+    Exponer tools de versionado:
+    <div style="margin-top:0.3rem;font-size:0.82rem;color:#aabbcc;">
+      - <code>snapshot_tool(component, version) -&gt; dict</code><br>
+      - <code>bump_tool(part) -&gt; str</code> (nueva version)<br>
+      - <code>tag_tool(component, version) -&gt; dict</code><br>
+      - Se registran en <code>orchestrator/tools/versioning.py</code><br>
+      - Se ejecuta automaticamente al final de cada workflow exitoso
+    </div>
+  </div>
+
+  <br>
+
+  <div class="section-title" style="font-size:1.1rem;"><span class="ico">[+]</span> Nueva Propuesta: Orchestrator Agent</div>
+  <div class="card-grid cols-2">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span> Orchestrator Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Nodo central que ejecuta el grafo LangGraph<br>
+        <strong>Modelo:</strong> Hermes 3<br>
+        <strong>Funcion:</strong> Recibe objetivos, ejecuta el grafo, orquesta nodos, publica eventos<br>
+        <strong>Eventos:</strong> Consume OBJECTIVE_SUBMITTED, publica WORKFLOW_COMPLETED
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span> Version Agent (nuevo)</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Agente de versionado continuo<br>
+        <strong>Modelo:</strong> Phi-4 (tasks rapidas)<br>
+        <strong>Funcion:</strong> Snapshot automatico al completar cada hito, bump de version, CHANGELOG<br>
+        <strong>Eventos:</strong> Consume WORKFLOW_STAGE_COMPLETED, publica VERSION_BUMPED
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 5: ARQUITECTURA FINAL ============ -->
+<div class="tab-content" id="tab-architecture">
+  <div class="section-title"><span class="ico">[=]</span> Arquitectura Final del Sistema Constructor Astrik</div>
+  <div class="section-desc">Como queda todo conectado cuando implementemos la Fase 2 y 3.</div>
+
+  <div class="arch-diagram">
+    <svg viewBox="0 0 950 540" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+      <defs>
+        <linearGradient id="af1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7b61ff"/><stop offset="100%" stop-color="#5a3ee0"/></linearGradient>
+        <linearGradient id="af2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#0090cc"/></linearGradient>
+        <linearGradient id="af3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff6bcb"/><stop offset="100%" stop-color="#d040a0"/></linearGradient>
+        <linearGradient id="af4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#00b85c"/></linearGradient>
+        <linearGradient id="af5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffab40"/><stop offset="100%" stop-color="#d08020"/></linearGradient>
+        <linearGradient id="afbg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1a2744"/><stop offset="100%" stop-color="#0d1525"/></linearGradient>
+        <filter id="sf"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/></filter>
+      </defs>
+      <rect x="0" y="0" width="950" height="540" rx="12" fill="url(#afbg)" opacity="0.6"/>
+
+      <!-- Title -->
+      <text x="475" y="28" text-anchor="middle" fill="#7b61ff" font-weight="700" font-size="16">CONSTRUCTOR ASTRIK - ARQUITECTURA FINAL</text>
+
+      <!-- Layer 1: User -->
+      <rect x="350" y="40" width="250" height="36" rx="8" fill="url(#af1)" filter="url(#sf)"/>
+      <text x="475" y="63" text-anchor="middle" fill="#fff" font-weight="700" font-size="13">[User] Usuario / OpenCode</text>
+
+      <line x1="475" y1="76" x2="475" y2="95" stroke="#7b61ff" stroke-width="2"/>
+
+      <!-- Layer 2: API -->
+      <rect x="350" y="97" width="250" height="36" rx="8" fill="url(#af2)" filter="url(#sf)"/>
+      <text x="475" y="120" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">FastAPI (server.py)</text>
+
+      <line x1="475" y1="133" x2="475" y2="150" stroke="#00c8ff" stroke-width="2"/>
+
+      <!-- Layer 3: LangGraph -->
+      <rect x="175" y="152" width="600" height="52" rx="10" fill="rgba(123,97,255,0.08)" stroke="#7b61ff" stroke-width="1.5" filter="url(#sf)"/>
+      <text x="475" y="175" text-anchor="middle" fill="#7b61ff" font-weight="700" font-size="14">[LG] LangGraph StateGraph</text>
+      <text x="475" y="193" text-anchor="middle" fill="#8899bb" font-size="9">Planner Node -> Skills Node -> Executor Node -> Validator Node -> Deployer Node</text>
+
+      <line x1="250" y1="204" x2="150" y2="230" stroke="#7b61ff" stroke-width="1.5"/>
+      <line x1="475" y1="204" x2="475" y2="230" stroke="#7b61ff" stroke-width="1.5"/>
+      <line x1="700" y1="204" x2="800" y2="230" stroke="#7b61ff" stroke-width="1.5"/>
+
+      <!-- Layer 4: Agents -->
+      <rect x="60" y="232" width="180" height="44" rx="8" fill="url(#af3)" filter="url(#sf)"/>
+      <text x="150" y="256" text-anchor="middle" fill="#fff" font-weight="600" font-size="11">[S] Skills Agent</text>
+      <text x="150" y="269" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">search | install | test</text>
+
+      <rect x="260" y="232" width="180" height="44" rx="8" fill="url(#af4)" filter="url(#sf)"/>
+      <text x="350" y="256" text-anchor="middle" fill="#fff" font-weight="600" font-size="11">[I] Infra Agent</text>
+      <text x="350" y="269" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">docker | compose | health</text>
+
+      <rect x="460" y="232" width="180" height="44" rx="8" fill="url(#af5)" filter="url(#sf)"/>
+      <text x="550" y="256" text-anchor="middle" fill="#fff" font-weight="600" font-size="11">[F] Factory Agent</text>
+      <text x="550" y="269" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">create | validate | list</text>
+
+      <rect x="660" y="232" width="180" height="44" rx="8" fill="url(#af2)" filter="url(#sf)"/>
+      <text x="750" y="256" text-anchor="middle" fill="#fff" font-weight="600" font-size="11">[V] Version Agent</text>
+      <text x="750" y="269" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7.5">snapshot | bump | tag</text>
+
+      <line x1="150" y1="276" x2="150" y2="298" stroke="#ff6bcb" stroke-width="1.5"/>
+      <line x1="350" y1="276" x2="350" y2="298" stroke="#00e676" stroke-width="1.5"/>
+      <line x1="550" y1="276" x2="550" y2="298" stroke="#ffab40" stroke-width="1.5"/>
+      <line x1="750" y1="276" x2="750" y2="298" stroke="#00c8ff" stroke-width="1.5"/>
+
+      <!-- Layer 5: Tools -->
+      <rect x="60" y="300" width="830" height="30" rx="6" fill="rgba(0,200,255,0.04)" stroke="#00c8ff" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="475" y="319" text-anchor="middle" fill="#00c8ff" font-size="9">TOOLS: github_search | docker_ops | filesystem | versioning | model_query</text>
+
+      <line x1="475" y1="330" x2="475" y2="350" stroke="#00c8ff" stroke-width="1.5"/>
+
+      <!-- Layer 6: Event Bus -->
+      <rect x="125" y="352" width="700" height="30" rx="6" fill="rgba(123,97,255,0.06)" stroke="#7b61ff" stroke-width="1"/>
+      <text x="475" y="371" text-anchor="middle" fill="#7b61ff" font-size="10">NATS EVENT BUS: TASK_CREATED | TASK_COMPLETED | TASK_FAILED | WORKFLOW_FINISHED</text>
+
+      <line x1="200" y1="382" x2="200" y2="400" stroke="#7b61ff" stroke-width="1"/>
+      <line x1="475" y1="382" x2="475" y2="400" stroke="#7b61ff" stroke-width="1"/>
+      <line x1="750" y1="382" x2="750" y2="400" stroke="#7b61ff" stroke-width="1"/>
+
+      <!-- Layer 7: Persistence -->
+      <rect x="60" y="402" width="250" height="44" rx="8" fill="rgba(0,200,255,0.04)" stroke="#00c8ff" stroke-width="0.8"/>
+      <text x="185" y="422" text-anchor="middle" fill="#00c8ff" font-size="10">PostgreSQL</text>
+      <text x="185" y="437" text-anchor="middle" fill="#667799" font-size="8">checkpoints + historial</text>
+
+      <rect x="350" y="402" width="250" height="44" rx="8" fill="rgba(0,230,118,0.04)" stroke="#00e676" stroke-width="0.8"/>
+      <text x="475" y="422" text-anchor="middle" fill="#00e676" font-size="10">Redis</text>
+      <text x="475" y="437" text-anchor="middle" fill="#667799" font-size="8">colas + cache</text>
+
+      <rect x="640" y="402" width="250" height="44" rx="8" fill="rgba(255,107,203,0.04)" stroke="#ff6bcb" stroke-width="0.8"/>
+      <text x="765" y="422" text-anchor="middle" fill="#ff6bcb" font-size="10">Qdrant</text>
+      <text x="765" y="437" text-anchor="middle" fill="#667799" font-size="8">memoria vectorial</text>
+
+      <line x1="185" y1="446" x2="185" y2="460" stroke="#00c8ff" stroke-width="1"/>
+      <line x1="475" y1="446" x2="475" y2="460" stroke="#00e676" stroke-width="1"/>
+      <line x1="765" y1="446" x2="765" y2="460" stroke="#ff6bcb" stroke-width="1"/>
+
+      <!-- Layer 8: GPU -->
+      <rect x="300" y="462" width="350" height="30" rx="8" fill="rgba(255,107,203,0.06)" stroke="#ff6bcb" stroke-width="1"/>
+      <text x="475" y="481" text-anchor="middle" fill="#ff6bcb" font-size="11">[GPU] llama.cpp (GPU) - Hermes 3 | DeepSeek-Coder | Qwen | Phi-4</text>
+
+      <!-- Output -->
+      <rect x="350" y="500" width="250" height="30" rx="8" fill="url(#af4)" filter="url(#sf)"/>
+      <text x="475" y="520" text-anchor="middle" fill="#fff" font-weight="600" font-size="11">[OK] RESULTADO: Release versionado</text>
+    </svg>
+  </div>
+
+  <div class="card-grid cols-3">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span> Fase 1 [OK] Lista</div>
+      <div class="card-body">
+        Infraestructura Docker definida<br>
+        Agent Factory funcional<br>
+        Skills Agent funcional<br>
+        Infra Agent funcional<br>
+        Versionado operativo<br>
+        Repo en GitHub
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-blue"></span> Fase 2 - En diseno</div>
+      <div class="card-body">
+        Orchestrator con LangGraph<br>
+        Nodos: planner, executor, validator, deployer<br>
+        Tools: search, docker, filesystem, versioning<br>
+        FastAPI wrapper + NATS events
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-green"></span> Fase 3 - Proximo</div>
+      <div class="card-body">
+        Agentes como servicios NATS<br>
+        Conexion con llama.cpp<br>
+        Workflow autonomo completo<br>
+        Dashboard de monitoreo
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  document.querySelectorAll('nav.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

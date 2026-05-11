@@ -20,7 +20,7 @@ services:
     image: postgres:16-alpine
     container_name: astrik-postgres
     ports:
-    - 5432:5432
+    - ${POSTGRES_PORT:-5432}:5432
     env_file:
     - .env
     volumes:
@@ -50,7 +50,7 @@ services:
     networks:
     - astrik-net
   qdrant:
-    image: qdrant/qdrant:v1.13
+    image: qdrant/qdrant:v1.13.6
     container_name: astrik-qdrant
     ports:
     - 6333:6333
@@ -60,7 +60,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - curl -sf http://localhost:6333/healthz || exit 1
+      - 'bash -lc "exec 3<>/dev/tcp/127.0.0.1/6333; printf ''GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'' >&3; grep -q ''200 OK'' <&3"'
       interval: 15s
       retries: 5
     networks:
@@ -76,7 +76,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - nats-server --signal healthz || exit 1
+      - wget -qO- http://localhost:8222/healthz || exit 1
       interval: 15s
       retries: 5
     networks:
