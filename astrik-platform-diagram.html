@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrik AI Platform — Arquitectura Completa</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0e17;
+    color: #e0e6f0;
+    overflow-x: hidden;
+  }
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  header {
+    position: relative; z-index: 1;
+    padding: 3rem 2rem 1.5rem; text-align: center;
+    background: linear-gradient(180deg, #0d1525 0%, transparent 100%);
+    border-bottom: 1px solid rgba(0,200,255,0.1);
+  }
+  header h1 {
+    font-size: 2.8rem; font-weight: 700;
+    background: linear-gradient(135deg, #00c8ff, #7b61ff, #ff6bcb);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  header .subtitle {
+    margin-top: 0.5rem; font-size: 1.1rem; color: #8899bb;
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+  }
+  header .subtitle span { -webkit-text-fill-color: #8899bb; }
+  header .badge {
+    display: inline-block; padding: 0.2rem 0.8rem; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600;
+    border: 1px solid rgba(0,200,255,0.3); color: #00c8ff;
+    background: rgba(0,200,255,0.08);
+  }
+  nav.tabs {
+    position: relative; z-index: 1;
+    display: flex; justify-content: center; gap: 0.25rem;
+    padding: 1rem 1rem 0; flex-wrap: wrap;
+  }
+  nav.tabs button {
+    padding: 0.6rem 1.4rem; border: 1px solid transparent; border-radius: 10px 10px 0 0;
+    background: transparent; color: #667799; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: all 0.25s; font-family: inherit;
+  }
+  nav.tabs button:hover { color: #aabbdd; background: rgba(255,255,255,0.03); }
+  nav.tabs button.active {
+    color: #00c8ff; background: rgba(0,200,255,0.06);
+    border-color: rgba(0,200,255,0.15) rgba(0,200,255,0.15) transparent;
+  }
+  main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+  .tab-content { display: none; animation: fadeIn 0.4s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---- Cards & Sections ---- */
+  .section-title {
+    font-size: 1.5rem; font-weight: 600; margin: 2rem 0 1rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .section-title .ico { font-size: 1.3rem; }
+  .section-desc { color: #8899bb; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+  .card-grid { display: grid; gap: 1rem; margin-bottom: 2rem; }
+  .card-grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  .card-grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .card-grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card-grid.cols-5 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .card {
+    background: rgba(20,30,50,0.6); border: 1px solid rgba(60,90,140,0.2);
+    border-radius: 14px; padding: 1.2rem 1.4rem;
+    backdrop-filter: blur(10px); transition: all 0.3s;
+  }
+  .card:hover { border-color: rgba(0,200,255,0.25); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,200,255,0.05); }
+  .card .card-title {
+    font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .card .card-title .dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+    flex-shrink: 0;
+  }
+  .card .card-body { font-size: 0.85rem; color: #8899bb; line-height: 1.6; }
+  .card .card-body ul { list-style: none; padding: 0; margin-top: 0.4rem; }
+  .card .card-body ul li::before { content: "▸ "; color: #00c8ff; }
+  .card .card-body ul li { margin-bottom: 0.2rem; font-size: 0.82rem; }
+  .card .tag {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px;
+    font-size: 0.7rem; font-weight: 500; margin: 0.15rem;
+    background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.15);
+  }
+
+  /* SVG Diagram */
+  .arch-diagram {
+    background: rgba(15,22,40,0.8); border: 1px solid rgba(60,90,140,0.2);
+    border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;
+    display: flex; justify-content: center;
+  }
+  .arch-diagram svg { max-width: 100%; height: auto; }
+
+  /* Session timeline */
+  .session-timeline { position: relative; padding-left: 2rem; }
+  .session-timeline::before {
+    content: ''; position: absolute; left: 12px; top: 0; bottom: 0;
+    width: 2px; background: linear-gradient(180deg, #00c8ff, #7b61ff, #ff6bcb);
+  }
+  .session-item {
+    position: relative; margin-bottom: 1.2rem; padding: 0.8rem 1.2rem;
+    background: rgba(20,30,50,0.4); border: 1px solid rgba(60,90,140,0.15);
+    border-radius: 10px; transition: all 0.3s;
+  }
+  .session-item:hover { border-color: rgba(0,200,255,0.2); }
+  .session-item::before {
+    content: attr(data-num); position: absolute; left: -1.85rem; top: 0.8rem;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #0a0e17; border: 2px solid #00c8ff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: #00c8ff;
+  }
+  .session-item .sess-title { font-weight: 600; font-size: 0.95rem; }
+  .session-item .sess-desc { font-size: 0.8rem; color: #8899bb; margin-top: 0.2rem; }
+  .session-item .sess-tech { margin-top: 0.4rem; display: flex; gap: 0.3rem; flex-wrap: wrap; }
+
+  /* Flow arrows */
+  .flow-row {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    flex-wrap: wrap; margin: 0.5rem 0;
+  }
+  .flow-step {
+    padding: 0.5rem 1rem; border-radius: 8px;
+    background: rgba(0,200,255,0.06); border: 1px solid rgba(0,200,255,0.12);
+    font-size: 0.78rem; font-weight: 500;
+  }
+  .flow-arrow { color: #00c8ff; font-size: 1.2rem; }
+
+  /* Color dots */
+  .dot-blue { background: #00c8ff; }
+  .dot-purple { background: #7b61ff; }
+  .dot-pink { background: #ff6bcb; }
+  .dot-green { background: #00e676; }
+  .dot-orange { background: #ffab40; }
+  .dot-yellow { background: #ffd740; }
+  .dot-red { background: #ff5252; }
+  .dot-teal { background: #1de9b6; }
+  .dot-cyan { background: #18ffff; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    nav.tabs button { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+    .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <h1>✦ Astrik AI Platform</h1>
+  <div class="subtitle">
+    <span>Plataforma Multi-Agente Local Autónoma</span>
+    <span class="badge">v1.0 · Arquitectura</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="arch">Arquitectura</button>
+  <button data-tab="sessions">Sesiones</button>
+  <button data-tab="agents">Agentes</button>
+  <button data-tab="tech">Stack Tecnológico</button>
+  <button data-tab="workflow">Workflow</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1: ARQUITECTURA ============ -->
+<div class="tab-content active" id="tab-arch">
+
+  <div class="section-title"><span class="ico">🏗️</span> Arquitectura del Sistema</div>
+  <div class="section-desc">Vista general de componentes y su comunicación. Todo corre 100% local con llama.cpp para inferencia.</div>
+
+  <div class="arch-diagram">
+    <svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+      <defs>
+        <linearGradient id="g-blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#0090cc"/></linearGradient>
+        <linearGradient id="g-purple" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7b61ff"/><stop offset="100%" stop-color="#5a3ee0"/></linearGradient>
+        <linearGradient id="g-pink" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff6bcb"/><stop offset="100%" stop-color="#d040a0"/></linearGradient>
+        <linearGradient id="g-green" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#00b85c"/></linearGradient>
+        <linearGradient id="g-orange" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffab40"/><stop offset="100%" stop-color="#d08020"/></linearGradient>
+        <linearGradient id="g-dark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1a2744"/><stop offset="100%" stop-color="#0d1525"/></linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.4"/></filter>
+      </defs>
+
+      <!-- Background -->
+      <rect x="0" y="0" width="1000" height="620" rx="12" fill="url(#g-dark)" opacity="0.6"/>
+
+      <!-- OpenCode Layer -->
+      <rect x="330" y="15" width="340" height="48" rx="10" fill="url(#g-blue)" opacity="0.9" filter="url(#shadow)"/>
+      <text x="500" y="45" text-anchor="middle" fill="#fff" font-weight="700" font-size="16">🧠 OpenCode — CLI / IDE</text>
+
+      <!-- Arrow down -->
+      <line x1="500" y1="63" x2="500" y2="88" stroke="#00c8ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
+      <defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#00c8ff"/></marker></defs>
+
+      <!-- Orchestrator Core -->
+      <rect x="280" y="90" width="440" height="90" rx="12" fill="rgba(0,200,255,0.08)" stroke="#00c8ff" stroke-width="1.5" filter="url(#shadow)"/>
+      <text x="500" y="115" text-anchor="middle" fill="#00c8ff" font-weight="700" font-size="15">⚙️ Orchestrator Core</text>
+      <text x="500" y="135" text-anchor="middle" fill="#8899bb" font-size="10.5">Task Scheduler · Workflow Engine · State Machine</text>
+      <text x="500" y="150" text-anchor="middle" fill="#8899bb" font-size="10.5">Agent Router · Model Router · Retry System</text>
+      <text x="500" y="165" text-anchor="middle" fill="#667799" font-size="9">FastAPI · Redis · PostgreSQL · NATS</text>
+
+      <!-- Arrow to Event Bus -->
+      <line x1="500" y1="180" x2="500" y2="210" stroke="#7b61ff" stroke-width="2"/>
+      <defs><marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7b61ff"/></marker></defs>
+
+      <!-- Event Bus -->
+      <rect x="250" y="212" width="500" height="58" rx="12" fill="rgba(123,97,255,0.08)" stroke="#7b61ff" stroke-width="1.5" filter="url(#shadow)"/>
+      <text x="500" y="238" text-anchor="middle" fill="#7b61ff" font-weight="700" font-size="14">🔌 Event Bus — NATS</text>
+      <text x="500" y="254" text-anchor="middle" fill="#8899bb" font-size="10">Publish / Subscribe · Workflow Events · Agent Events · Monitoring</text>
+
+      <!-- Event Bus branches to agents -->
+      <line x1="350" y1="270" x2="200" y2="310" stroke="#7b61ff" stroke-width="1.5" opacity="0.6"/>
+      <line x1="500" y1="270" x2="500" y2="310" stroke="#7b61ff" stroke-width="1.5" opacity="0.6"/>
+      <line x1="650" y1="270" x2="800" y2="310" stroke="#7b61ff" stroke-width="1.5" opacity="0.6"/>
+
+      <!-- Agent boxes row -->
+      <!-- Agent 1: Planner -->
+      <rect x="110" y="312" width="180" height="80" rx="10" fill="rgba(255,107,203,0.08)" stroke="#ff6bcb" stroke-width="1.2" filter="url(#shadow)"/>
+      <text x="200" y="338" text-anchor="middle" fill="#ff6bcb" font-weight="600" font-size="13">📋 Planner Agent</text>
+      <text x="200" y="355" text-anchor="middle" fill="#8899bb" font-size="9">Divide tareas · Genera DAGs</text>
+      <text x="200" y="370" text-anchor="middle" fill="#8899bb" font-size="9">Prioriza · Asigna agentes</text>
+      <text x="200" y="383" text-anchor="middle" fill="#667799" font-size="8">Modelo: Hermes 3</text>
+
+      <!-- Agent 2: Backend -->
+      <rect x="410" y="312" width="180" height="80" rx="10" fill="rgba(0,230,118,0.08)" stroke="#00e676" stroke-width="1.2" filter="url(#shadow)"/>
+      <text x="500" y="338" text-anchor="middle" fill="#00e676" font-weight="600" font-size="13">💻 Backend Agent</text>
+      <text x="500" y="355" text-anchor="middle" fill="#8899bb" font-size="9">FastAPI · Schemas · Tests</text>
+      <text x="500" y="370" text-anchor="middle" fill="#8899bb" font-size="9">PostgreSQL · Async</text>
+      <text x="500" y="383" text-anchor="middle" fill="#667799" font-size="8">Modelo: DeepSeek-Coder</text>
+
+      <!-- Agent 3: QA -->
+      <rect x="710" y="312" width="180" height="80" rx="10" fill="rgba(255,171,64,0.08)" stroke="#ffab40" stroke-width="1.2" filter="url(#shadow)"/>
+      <text x="800" y="338" text-anchor="middle" fill="#ffab40" font-weight="600" font-size="13">✅ QA Agent</text>
+      <text x="800" y="355" text-anchor="middle" fill="#8899bb" font-size="9">Unit tests · Integration</text>
+      <text x="800" y="370" text-anchor="middle" fill="#8899bb" font-size="9">Linting · Security Scan</text>
+      <text x="800" y="383" text-anchor="middle" fill="#667799" font-size="8">Modelo: Qwen2.5-Coder</text>
+
+      <!-- Additional agents row 2 -->
+      <rect x="110" y="405" width="180" height="65" rx="10" fill="rgba(255,215,64,0.06)" stroke="#ffd740" stroke-width="1" opacity="0.8"/>
+      <text x="200" y="428" text-anchor="middle" fill="#ffd740" font-weight="600" font-size="11">🏗️ Architect Agent</text>
+      <text x="200" y="445" text-anchor="middle" fill="#667799" font-size="8">Diseño · Documentación</text>
+
+      <rect x="410" y="405" width="180" height="65" rx="10" fill="rgba(255,82,82,0.06)" stroke="#ff5252" stroke-width="1" opacity="0.8"/>
+      <text x="500" y="428" text-anchor="middle" fill="#ff5252" font-weight="600" font-size="11">🔒 Security Agent</text>
+      <text x="500" y="445" text-anchor="middle" fill="#667799" font-size="8">Análisis estático · Auditoría</text>
+
+      <rect x="710" y="405" width="180" height="65" rx="10" fill="rgba(29,233,182,0.06)" stroke="#1de9b6" stroke-width="1" opacity="0.8"/>
+      <text x="800" y="428" text-anchor="middle" fill="#1de9b6" font-weight="600" font-size="11">🐳 DevOps Agent</text>
+      <text x="800" y="445" text-anchor="middle" fill="#667799" font-size="8">Docker · Deploy · CI/CD</text>
+
+      <!-- Arrow down from agents to memory -->
+      <line x1="200" y1="470" x2="200" y2="495" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+      <line x1="500" y1="470" x2="500" y2="495" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+      <line x1="800" y1="470" x2="800" y2="495" stroke="#8899bb" stroke-width="1" opacity="0.4"/>
+
+      <!-- Memory Layer -->
+      <rect x="60" y="497" width="880" height="58" rx="12" fill="rgba(0,200,255,0.05)" stroke="#00c8ff" stroke-width="1" stroke-dasharray="4,3" filter="url(#shadow)"/>
+      <text x="500" y="520" text-anchor="middle" fill="#00c8ff" font-weight="700" font-size="14">🧠 Memory Layer</text>
+      <text x="500" y="538" text-anchor="middle" fill="#8899bb" font-size="10">Redis (short-term) · Qdrant (vectors) · PostgreSQL (persistence) · Git Indexing · RAG</text>
+
+      <!-- Arrow to runtimes -->
+      <line x1="500" y1="555" x2="500" y2="578" stroke="#ff6bcb" stroke-width="2"/>
+
+      <!-- Model Runtime -->
+      <rect x="280" y="580" width="440" height="38" rx="10" fill="rgba(255,107,203,0.08)" stroke="#ff6bcb" stroke-width="1.5"/>
+      <text x="500" y="604" text-anchor="middle" fill="#ff6bcb" font-weight="700" font-size="13">🤖 Model Runtime — llama.cpp (GPU Directo)</text>
+
+      <!-- Labels -->
+      <rect x="15" y="600" width="170" height="20" rx="4" fill="rgba(0,200,255,0.1)"/>
+      <text x="100" y="614" text-anchor="middle" fill="#00c8ff" font-size="8.5">ALL COMPONENTS 100% LOCAL</text>
+
+      <!-- Legend -->
+      <circle cx="750" cy="20" r="4" fill="#00c8ff"/>
+      <text x="760" y="24" fill="#667799" font-size="8">OpenCode</text>
+      <circle cx="810" cy="20" r="4" fill="#7b61ff"/>
+      <text x="820" y="24" fill="#667799" font-size="8">Event Bus</text>
+      <circle cx="870" cy="20" r="4" fill="#ff6bcb"/>
+      <text x="880" y="24" fill="#667799" font-size="8">Agents</text>
+    </svg>
+  </div>
+
+  <div class="card-grid cols-2">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-blue"></span> OpenCode</div>
+      <div class="card-body">CLI / IDE principal. Desde acá lanzamos sesiones y sub-agentes para construir cada módulo. Es el punto de entrada del desarrollador.</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span> Orchestrator Core</div>
+      <div class="card-body">El cerebro del sistema. Recibe objetivos, los descompone, asigna agentes y trackea el estado de cada tarea. Usa FastAPI + Redis + PostgreSQL + NATS.</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-green"></span> Sistema de Agentes</div>
+      <div class="card-body">Agentes especializados (planner, backend, qa, devops, architect, security). Cada uno con un rol, herramientas y modelo asignado.</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-pink"></span> Memoria Persistente</div>
+      <div class="card-body">Tres capas: Redis (short-term), Qdrant (memoria vectorial/semántica), PostgreSQL (persistencia estructurada). RAG + Git indexing incluidos.</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-orange"></span> Event Bus (NATS)</div>
+      <div class="card-body">Comunicación asíncrona entre agentes. Eventos de tareas, workflows, errores. Permite desacoplamiento total entre componentes.</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-red"></span> llama.cpp Runtime</div>
+      <div class="card-body">Motor de inferencia directa sobre GPUs. Soporta modelos GGUF: Hermes 3, DeepSeek-Coder, Qwen2.5-Coder, Phi-4. Control total de VRAM y scheduling.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 2: SESIONES ============ -->
+<div class="tab-content" id="tab-sessions">
+  <div class="section-title"><span class="ico">📋</span> Plan de Ejecución — 10 Sesiones</div>
+  <div class="section-desc">Orden exacto de construcción. Cada sesión produce un módulo funcional e independiente.</div>
+
+  <div class="session-timeline">
+    <div class="session-item" data-num="1">
+      <div class="sess-title">🔧 Infraestructura Base</div>
+      <div class="sess-desc">Docker-compose modular con PostgreSQL, Redis, Qdrant, NATS. Redes, volúmenes, healthchecks, variables de entorno, monitoring.</div>
+      <div class="sess-tech"><span class="tag">Docker</span><span class="tag">PostgreSQL</span><span class="tag">Redis</span><span class="tag">Qdrant</span><span class="tag">NATS</span></div>
+    </div>
+    <div class="session-item" data-num="2">
+      <div class="sess-title">⚙️ Orchestrator Core</div>
+      <div class="sess-desc">FastAPI con scheduler, workflow engine, task state machine, agent/model router, retry system, logs, métricas.</div>
+      <div class="sess-tech"><span class="tag">FastAPI</span><span class="tag">Python</span><span class="tag">Redis</span><span class="tag">PostgreSQL</span><span class="tag">NATS</span></div>
+    </div>
+    <div class="session-item" data-num="3">
+      <div class="sess-title">📋 Planner Agent</div>
+      <div class="sess-desc">Recibe objetivos, divide tareas, genera DAGs, prioriza y asigna agentes. Modelo: Hermes 3.</div>
+      <div class="sess-tech"><span class="tag">Hermes 3</span><span class="tag">Python</span><span class="tag">llama.cpp</span></div>
+    </div>
+    <div class="session-item" data-num="4">
+      <div class="sess-title">💻 Backend Agent</div>
+      <div class="sess-desc">Genera APIs FastAPI, schemas, tests, maneja PostgreSQL. Modelo: DeepSeek-Coder.</div>
+      <div class="sess-tech"><span class="tag">DeepSeek-Coder</span><span class="tag">FastAPI</span><span class="tag">PostgreSQL</span></div>
+    </div>
+    <div class="session-item" data-num="5">
+      <div class="sess-title">🧠 Memory Engine</div>
+      <div class="sess-desc">Embeddings, vector indexing, semantic retrieval, chunking, git indexing, RAG, context compression.</div>
+      <div class="sess-tech"><span class="tag">Qdrant</span><span class="tag">Redis</span><span class="tag">PostgreSQL</span><span class="tag">Embeddings</span></div>
+    </div>
+    <div class="session-item" data-num="6">
+      <div class="sess-title">🔌 Event Bus</div>
+      <div class="sess-desc">Sistema de eventos NATS: publish/subscribe, workflow events, agent events, retry events, monitoring.</div>
+      <div class="sess-tech"><span class="tag">NATS</span><span class="tag">Python</span></div>
+    </div>
+    <div class="session-item" data-num="7">
+      <div class="sess-title">✅ QA System</div>
+      <div class="sess-desc">Tests automáticos, static analysis, linting, integration testing, security checks.</div>
+      <div class="sess-tech"><span class="tag">Python</span><span class="tag">Pytest</span><span class="tag">Ruff</span></div>
+    </div>
+    <div class="session-item" data-num="8">
+      <div class="sess-title">🐳 DevOps Agent</div>
+      <div class="sess-desc">Generación de Dockerfiles, compose dinámico, deploy local, CI/CD, monitoring.</div>
+      <div class="sess-tech"><span class="tag">Docker</span><span class="tag">Python</span></div>
+    </div>
+    <div class="session-item" data-num="9">
+      <div class="sess-title">📊 Dashboard</div>
+      <div class="sess-desc">Panel web: agentes activos, workflows, logs, modelos cargados, uso GPU, tareas, métricas.</div>
+      <div class="sess-tech"><span class="tag">Next.js</span><span class="tag">Tailwind</span><span class="tag">WebSockets</span></div>
+    </div>
+    <div class="session-item" data-num="10">
+      <div class="sess-title">🔗 Integración Final</div>
+      <div class="sess-desc">Conectar todos los servicios. Workflows completos, memoria compartida, comunicación entre agentes, tests E2E, scripts de arranque.</div>
+      <div class="sess-tech"><span class="tag">Integración</span><span class="tag">Tests E2E</span><span class="tag">Documentación</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 3: AGENTES ============ -->
+<div class="tab-content" id="tab-agents">
+  <div class="section-title"><span class="ico">🤖</span> Sistema de Agentes</div>
+  <div class="section-desc">Cada agente tiene un rol específico, herramientas asignadas y un modelo de IA optimizado para su función.</div>
+
+  <div class="card-grid cols-2">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-pink"></span> Planner Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Orquestación y coordinación<br>
+        <strong>Modelo:</strong> Hermes 3 (llama.cpp)<br>
+        <strong>Funciones:</strong> Recibe objetivos, divide en tareas, genera DAGs de dependencias, prioriza, asigna agentes<br>
+        <strong>Eventos:</strong> Publica TASK_CREATED, WORKFLOW_STARTED
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-green"></span> Backend Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Generación de APIs y lógica backend<br>
+        <strong>Modelo:</strong> DeepSeek-Coder (llama.cpp)<br>
+        <strong>Funciones:</strong> FastAPI, schemas Pydantic, modelos SQLAlchemy, tests, async<br>
+        <strong>Eventos:</strong> Publica TASK_COMPLETED, consume TASK_ASSIGNED
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-orange"></span> QA Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Validación y calidad de código<br>
+        <strong>Modelo:</strong> Qwen2.5-Coder (llama.cpp)<br>
+        <strong>Funciones:</strong> Unit tests, integration tests, linting, static analysis, security scan<br>
+        <strong>Eventos:</strong> Publica TASK_FAILED/TASK_PASSED
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-teal"></span> DevOps Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Infraestructura y deploy<br>
+        <strong>Modelo:</strong> Phi-4 (llama.cpp)<br>
+        <strong>Funciones:</strong> Dockerfiles, docker-compose, deploy local, CI/CD, monitoring<br>
+        <strong>Eventos:</strong> Publica DEPLOY_STARTED, DEPLOY_FINISHED
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-yellow"></span> Architect Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Diseño y documentación arquitectural<br>
+        <strong>Modelo:</strong> Hermes 3<br>
+        <strong>Funciones:</strong> Diagramas, contratos API, decisiones técnicas, documentación<br>
+        <strong>Herramientas:</strong> filesystem, docs
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-red"></span> Security Agent</div>
+      <div class="card-body">
+        <strong>Rol:</strong> Auditoría de seguridad<br>
+        <strong>Modelo:</strong> Qwen2.5-Coder<br>
+        <strong>Funciones:</strong> Análisis de vulnerabilidades, secretos, validación de dependencias<br>
+        <strong>Herramientas:</strong> static analysis, bandit
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 4: STACK ============ -->
+<div class="tab-content" id="tab-tech">
+  <div class="section-title"><span class="ico">🛠️</span> Stack Tecnológico</div>
+  <div class="section-desc">Infraestructura, modelos y herramientas del proyecto.</div>
+
+  <div class="section-title" style="font-size:1.1rem;margin-top:1rem;"><span class="ico">🗄️</span> Infraestructura</div>
+  <div class="card-grid cols-4">
+    <div class="card"><div class="card-title"><span class="dot dot-blue"></span> PostgreSQL</div><div class="card-body">Persistencia estructurada. Tasks, agentes, workflows, configuraciones.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-blue"></span> Redis</div><div class="card-body">Caché, short-term memory, colas de tareas, sesiones.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-blue"></span> Qdrant</div><div class="card-body">Memoria vectorial. Embeddings, búsqueda semántica, RAG.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-purple"></span> NATS</div><div class="card-body">Event bus. Comunicación asíncrona entre agentes y servicios.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-green"></span> Docker</div><div class="card-body">Contenedores. Servicios modulares con healthchecks y redes.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-green"></span> FastAPI</div><div class="card-body">API REST principal del orchestrator. Async, Pydantic, OpenAPI.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-orange"></span> llama.cpp</div><div class="card-body">Motor de inferencia GPU. Reemplazo de Ollama. GGUF, batch, scheduling.</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-pink"></span> Next.js</div><div class="card-body">Dashboard web. Tailwind, WebSockets, monitoreo visual.</div></div>
+  </div>
+
+  <div class="section-title" style="font-size:1.1rem;margin-top:1rem;"><span class="ico">🧠</span> Modelos de IA</div>
+  <div class="card-grid cols-4">
+    <div class="card"><div class="card-title"><span class="dot dot-pink"></span> Hermes 3</div><div class="card-body"><strong>Rol:</strong> Planner / Coordinación<br><strong>Formato:</strong> GGUF<br><strong>Uso:</strong> Planificación, división de tareas, orquestación</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-green"></span> DeepSeek-Coder</div><div class="card-body"><strong>Rol:</strong> Backend Developer<br><strong>Formato:</strong> GGUF<br><strong>Uso:</strong> Generación de APIs, schemas, lógica backend</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-orange"></span> Qwen2.5-Coder</div><div class="card-body"><strong>Rol:</strong> QA / Fullstack<br><strong>Formato:</strong> GGUF<br><strong>Uso:</strong> Tests, análisis, debugging</div></div>
+    <div class="card"><div class="card-title"><span class="dot dot-teal"></span> Phi-4</div><div class="card-body"><strong>Rol:</strong> Fast Tasks<br><strong>Formato:</strong> GGUF<br><strong>Uso:</strong> Tareas rápidas, devops, lightweight</div></div>
+  </div>
+
+  <div class="section-title" style="font-size:1.1rem;margin-top:1rem;"><span class="ico">📁</span> Estructura del Repositorio</div>
+  <div class="arch-diagram" style="justify-content:flex-start;padding:1rem 2rem;font-family:'Consolas','Courier New',monospace;font-size:0.85rem;line-height:1.9;">
+    <pre style="color:#8899bb;">
+<span style="color:#00c8ff;font-weight:600;">astrik-ai-platform/</span>
+├── <span style="color:#7b61ff;">orchestrator/</span>        # Core del sistema
+├── <span style="color:#ff6bcb;">agents/</span>              # Agentes especializados
+│   ├── planner/
+│   ├── architect/
+│   ├── backend/
+│   ├── frontend/
+│   ├── qa/
+│   ├── security/
+│   ├── devops/
+│   ├── research/
+│   └── documentation/
+├── <span style="color:#00e676;">runtimes/</span>            # Motores de inferencia
+│   ├── llamacpp/         # GPU directo
+│   └── vllm/             # Opcional
+├── <span style="color:#00c8ff;">memory/</span>              # Capa de memoria
+│   ├── qdrant/
+│   ├── embeddings/
+│   ├── rag/
+│   └── indexing/
+├── <span style="color:#ffab40;">infrastructure/</span>      # Docker y servicios
+│   ├── docker/
+│   ├── compose/
+│   ├── monitoring/
+│   └── networking/
+├── <span style="color:#18ffff;">frontend/</span>            # Dashboard Next.js
+├── <span style="color:#8899bb;">shared/</span>              # Código compartido
+├── <span style="color:#8899bb;">workflows/</span>           # Definiciones de workflows
+├── <span style="color:#8899bb;">prompts/</span>             # Prompts del sistema
+├── <span style="color:#8899bb;">docs/</span>                # Documentación
+├── <span style="color:#8899bb;">tests/</span>               # Tests E2E
+└── <span style="color:#8899bb;">scripts/</span>             # Utilidades</pre>
+  </div>
+</div>
+
+<!-- ============ TAB 5: WORKFLOW ============ -->
+<div class="tab-content" id="tab-workflow">
+  <div class="section-title"><span class="ico">🔄</span> Workflow Autónomo</div>
+  <div class="section-desc">Cómo fluye un objetivo desde que el usuario lo pide hasta que se despliega automáticamente.</div>
+
+  <div class="arch-diagram" style="padding:2rem;">
+    <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;">
+      <defs>
+        <linearGradient id="gw1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#0090cc"/></linearGradient>
+        <linearGradient id="gw2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7b61ff"/><stop offset="100%" stop-color="#5a3ee0"/></linearGradient>
+        <linearGradient id="gw3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff6bcb"/><stop offset="100%" stop-color="#d040a0"/></linearGradient>
+        <linearGradient id="gw4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#00b85c"/></linearGradient>
+        <linearGradient id="gw5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffab40"/><stop offset="100%" stop-color="#d08020"/></linearGradient>
+        <linearGradient id="gw6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1de9b6"/><stop offset="100%" stop-color="#00b89c"/></linearGradient>
+        <filter id="shadow2"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/></filter>
+      </defs>
+      <rect x="0" y="0" width="900" height="340" rx="12" fill="#0d1525" opacity="0.5"/>
+
+      <!-- Row 1: User Input -->
+      <rect x="330" y="20" width="240" height="44" rx="10" fill="url(#gw1)" filter="url(#shadow2)"/>
+      <text x="450" y="47" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">👤 Usuario escribe objetivo</text>
+      <line x1="450" y1="64" x2="450" y2="85" stroke="#00c8ff" stroke-width="2"/>
+      <defs><marker id="aw1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7b61ff"/></marker></defs>
+
+      <!-- Row 2: Planner -->
+      <rect x="300" y="87" width="300" height="44" rx="10" fill="url(#gw2)" filter="url(#shadow2)"/>
+      <text x="450" y="114" text-anchor="middle" fill="#fff" font-weight="600" font-size="13">📋 Planner Agent divide en tareas</text>
+      <line x1="450" y1="131" x2="450" y2="145" stroke="#7b61ff" stroke-width="2"/>
+
+      <!-- Row 3: Parallel agents -->
+      <line x1="300" y1="150" x2="150" y2="170" stroke="#7b61ff" stroke-width="1.5"/>
+      <line x1="450" y1="150" x2="450" y2="170" stroke="#7b61ff" stroke-width="1.5"/>
+      <line x1="600" y1="150" x2="750" y2="170" stroke="#7b61ff" stroke-width="1.5"/>
+
+      <rect x="60" y="172" width="180" height="44" rx="10" fill="url(#gw3)" filter="url(#shadow2)"/>
+      <text x="150" y="199" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">💻 Backend Agent</text>
+      <text x="150" y="211" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">Genera APIs + Schemas</text>
+
+      <rect x="360" y="172" width="180" height="44" rx="10" fill="url(#gw4)" filter="url(#shadow2)"/>
+      <text x="450" y="199" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">🧠 Memory Engine</text>
+      <text x="450" y="211" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">Contexto + RAG</text>
+
+      <rect x="660" y="172" width="180" height="44" rx="10" fill="url(#gw3)" filter="url(#shadow2)"/>
+      <text x="750" y="199" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">📋 Planner Agent</text>
+      <text x="750" y="211" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">Coordina y supervisa</text>
+
+      <!-- Arrows down from parallel -->
+      <line x1="150" y1="216" x2="150" y2="233" stroke="#ff6bcb" stroke-width="1.5"/>
+      <line x1="450" y1="216" x2="450" y2="233" stroke="#ff6bcb" stroke-width="1.5"/>
+      <line x1="750" y1="216" x2="750" y2="233" stroke="#ff6bcb" stroke-width="1.5"/>
+
+      <!-- Row 4: QA -->
+      <rect x="300" y="235" width="300" height="44" rx="10" fill="url(#gw5)" filter="url(#shadow2)"/>
+      <text x="450" y="262" text-anchor="middle" fill="#fff" font-weight="600" font-size="13">✅ QA Agent valida y testea</text>
+      <line x1="450" y1="279" x2="450" y2="293" stroke="#ffab40" stroke-width="2"/>
+
+      <!-- Row 5: DevOps -->
+      <rect x="300" y="295" width="300" height="44" rx="10" fill="url(#gw6)" filter="url(#shadow2)"/>
+      <text x="450" y="322" text-anchor="middle" fill="#fff" font-weight="600" font-size="13">🐳 DevOps Agent despliega</text>
+    </svg>
+  </div>
+
+  <div class="card-grid cols-2">
+    <div class="card">
+      <div class="card-title"><span class="dot dot-blue"></span> Flujo Completo</div>
+      <div class="card-body">
+        <ol style="padding-left:1.2rem;color:#8899bb;">
+          <li style="margin-bottom:0.3rem;">Usuario escribe un objetivo en lenguaje natural</li>
+          <li style="margin-bottom:0.3rem;">Planner Agent recibe el objetivo y lo descompone en tareas (DAG)</li>
+          <li style="margin-bottom:0.3rem;">Cada tarea se asigna al agente especializado correspondiente</li>
+          <li style="margin-bottom:0.3rem;">Agentes trabajan en paralelo, comparten contexto vía Memory Layer</li>
+          <li style="margin-bottom:0.3rem;">QA Agent valida cada entregable automáticamente</li>
+          <li style="margin-bottom:0.3rem;">DevOps Agent dockeriza y despliega localmente</li>
+          <li style="margin-bottom:0.3rem;">Dashboard muestra el estado en tiempo real</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot dot-purple"></span> Modelo de Eventos</div>
+      <div class="card-body">
+        <div style="display:grid;gap:0.3rem;font-size:0.82rem;">
+          <div><span class="tag" style="background:rgba(0,200,255,0.1);color:#00c8ff;">TASK_CREATED</span> → Tarea nueva en el sistema</div>
+          <div><span class="tag" style="background:rgba(123,97,255,0.1);color:#7b61ff;">TASK_ASSIGNED</span> → Asignada a un agente</div>
+          <div><span class="tag" style="background:rgba(255,107,203,0.1);color:#ff6bcb;">TASK_RUNNING</span> → Agente trabajando</div>
+          <div><span class="tag" style="background:rgba(0,230,118,0.1);color:#00e676;">TASK_COMPLETED</span> → Tarea terminada</div>
+          <div><span class="tag" style="background:rgba(255,82,82,0.1);color:#ff5252;">TASK_FAILED</span> → Error, se reintenta</div>
+          <div><span class="tag" style="background:rgba(255,215,64,0.1);color:#ffd740;">WORKFLOW_FINISHED</span> → Flujo completo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  document.querySelectorAll('nav.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

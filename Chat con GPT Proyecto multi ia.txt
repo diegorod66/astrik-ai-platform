@@ -1,0 +1,1499 @@
+Sí, hoy el ecosistema cambió muchísimo y ya estás en un punto donde un sistema como OpenCode + agentes + modelos locales realmente puede construir gran parte de esta plataforma casi de forma autónoma si lo estructuras correctamente.
+
+Y sí: la familia de modelos Hermes está teniendo muy buena reputación actualmente, especialmente para:
+
+agentic workflows
+tool calling
+multi-step reasoning
+coordinación entre agentes
+conversación persistente
+instrucciones largas
+roleplay de agentes especializados
+
+Pero hay matices importantes.
+
+1. ¿Es Hermes IA una buena elección?
+Sí, pero NO como único modelo
+
+Hoy la mejor estrategia NO es:
+
+1 modelo hace todo
+
+La mejor estrategia es:
+
+Hermes → coordinación y reasoning
+DeepSeek/Qwen → coding
+Phi → tareas rápidas
+Modelos Hermes recomendados actualmente
+Los más usados hoy
+Modelo	Uso ideal
+Hermes 3 Llama 3.1	Orquestación
+Nous Hermes 2 Mixtral	Multiagente
+OpenHermes	Conversacional
+Hermes + function calling	Tool orchestration
+Lo que Hermes hace MUY bien
+1. Seguir instrucciones largas
+
+Ejemplo:
+
+"Divide este proyecto en tareas y coordina agentes"
+
+Hermes suele comportarse mejor que muchos modelos chicos.
+
+2. Role-based agents
+
+Muy bueno simulando:
+
+arquitecto
+PM
+reviewer
+planner
+coordinador
+3. Tool calling
+
+Ideal para:
+
+ejecutar comandos
+llamar APIs
+usar MCP
+workflows agentic
+Lo que Hermes NO hace tan bien
+Coding ultra pesado
+
+Para eso siguen siendo mejores:
+
+Modelo	Mejor para
+DeepSeek-Coder	Backend grande
+Qwen2.5-Coder	Fullstack
+Codestral	Refactor
+StarCoder2	Liviano
+2. Lo más importante: cómo lograr que OpenCode te construya TODO
+
+Acá está la clave real.
+
+NO necesitas pedirle:
+
+"hazme un sistema multiagente"
+
+Eso falla.
+
+Necesitas convertir OpenCode en un “meta-desarrollador”
+
+O sea:
+
+OpenCode
+  ↓
+genera
+  ↓
+agentes especializados
+  ↓
+que generan el sistema
+3. Arquitectura REAL para que OpenCode te lo construya
+Lo que necesitas primero
+A. Workspace estructurado
+
+Ejemplo:
+
+ai-platform/
+│
+├── orchestrator/
+├── agents/
+├── memory/
+├── runtimes/
+├── infrastructure/
+├── frontend/
+├── docs/
+├── prompts/
+└── workflows/
+B. Reglas persistentes de desarrollo
+
+En OpenCode debes crear:
+
+System Rules globales
+
+Ejemplo:
+
+- usar arquitectura desacoplada
+- usar docker siempre
+- cada servicio debe tener README
+- usar FastAPI
+- usar async
+- todo configurable por YAML
+- no hardcodear modelos
+- logs estructurados
+C. Agentes internos en OpenCode
+
+Acá está el verdadero salto.
+
+Necesitas crear:
+
+Agente	Función
+architect-agent	diseño
+backend-agent	APIs
+infra-agent	Docker/K8s
+llm-agent	integración modelos
+memory-agent	RAG
+qa-agent	testing
+4. Cómo lograr que OpenCode trabaje como un equipo
+La técnica correcta
+
+NO usar:
+
+1 chat enorme
+
+SÍ usar:
+
+1 workspace
++ múltiples sesiones
++ múltiples agentes
++ contextos separados
+Estructura recomendada
+Sesión 1
+Architect Agent
+
+Define:
+
+módulos
+APIs
+contratos
+workflows
+Sesión 2
+Backend Agent
+
+Construye:
+
+FastAPI
+endpoints
+queues
+Sesión 3
+Infra Agent
+
+Construye:
+
+Docker
+compose
+GPU runtime
+networking
+Sesión 4
+Memory Agent
+
+Construye:
+
+Qdrant
+embeddings
+indexing
+5. Lo CRÍTICO para que funcione de verdad
+Necesitas documentos “fuente de verdad”
+
+Ejemplo:
+
+docs/
+ ├── architecture.md
+ ├── api_contracts.md
+ ├── workflows.md
+ ├── memory_strategy.md
+ └── coding_standards.md
+Porque OpenCode necesita estabilidad contextual
+
+Si no:
+
+empieza a divergir
+rompe módulos
+cambia tecnologías
+genera caos
+6. Stack EXACTO que yo usaría HOY
+Host
+Componente	Recomendación
+OS	Ubuntu Server
+Hypervisor	Proxmox VE
+Container	Docker
+Cluster	K3s
+IA Runtime
+Capa	Tecnología
+Model server	Ollama
+Heavy inference	vLLM
+GGUF runtime	llama.cpp
+Agentes
+Framework	Uso
+AutoGen	multi-agent
+LangGraph	workflows
+CrewAI	simple orchestration
+Backend
+Tecnología	Uso
+FastAPI	APIs
+Redis	memory
+PostgreSQL	persistence
+Qdrant	vector memory
+NATS	events
+Frontend
+Tecnología	Uso
+Next.js	dashboard
+Tauri	desktop
+7. Cómo haces que OpenCode construya el sistema SOLO
+Estrategia correcta
+PASO 1
+
+Primero NO pedir código.
+
+Pedir:
+
+arquitectura completa
+PASO 2
+
+Luego:
+
+descomposición de microservicios
+PASO 3
+
+Luego:
+
+contratos API
+PASO 4
+
+Luego recién:
+
+implementación servicio por servicio
+Lo que la mayoría hace mal
+
+Intentar:
+
+"hazme todo"
+Lo correcto
+
+Construcción incremental dirigida por arquitectura.
+
+8. Cómo sería el pipeline ideal
+Hermes Planner
+      ↓
+Task Graph
+      ↓
+OpenCode Sessions
+      ↓
+Agents especializados
+      ↓
+Git branches
+      ↓
+QA Agents
+      ↓
+Merge automático
+      ↓
+Deploy local
+9. Lo que realmente te falta para hacerlo viable
+Hardware mínimo SERIO
+Para que esto deje de ser “demo”
+Recurso	Recomendado
+CPU	Ryzen 9 / Threadripper
+RAM	128 GB
+GPU	RTX 4090 mínimo
+Ideal	2 GPUs
+SSD	NVMe Gen4
+Porque el problema real es:
+múltiples modelos concurrentes
+
+No un único chat.
+
+10. Lo más importante: la arquitectura mental
+
+Debes pensar esto como:
+
+“un sistema operativo de agentes”
+
+NO como:
+
+un chatbot
+11. La arquitectura REALISTA para arrancar
+FASE 1 — 100% viable HOY
+Objetivo
+
+Sistema multiagente local funcional.
+
+Componentes
+OpenCode
++ Ollama
++ Hermes
++ DeepSeek-Coder
++ Qdrant
++ FastAPI
++ Docker
+FASE 2
+
+Agregar:
+
+AutoGen
++ LangGraph
++ Event Bus
+FASE 3
+
+Agregar:
+
+K3s
++ multiGPU
++ distributed agents
+12. Mi recomendación concreta para vos
+
+Por tu perfil técnico y todo lo que vienes trabajando con:
+
+Odoo
+Proxmox
+agentes
+OpenWork/OpenCode
+automatización
+infraestructura
+
+yo haría:
+
+Arquitectura inicial recomendada
+HOST:
+Proxmox
+
+VM 1:
+OpenCode + UI
+
+VM 2:
+Ollama Runtime
+
+VM 3:
+Qdrant + Redis + PostgreSQL
+
+VM 4:
+Agent Orchestrator
+Modelos iniciales
+Función	Modelo
+Planner	Hermes
+Coding	DeepSeek-Coder
+Fast Tasks	Phi-4
+Research	Qwen
+Y el punto más importante:
+OpenCode NO reemplaza la arquitectura
+
+OpenCode acelera muchísimo.
+
+Pero si no defines:
+
+contratos
+workflows
+memoria
+boundaries
+roles de agentes
+
+termina generando caos.
+
+Conclusión real
+
+Sí, hoy ya es técnicamente posible construir una especie de “Claude Cowork local” usando:
+
+OpenCode
+Ollama
+Hermes
+DeepSeek
+AutoGen
+LangGraph
+infraestructura local
+
+y hacer que múltiples agentes trabajen en paralelo.
+
+Pero el verdadero desafío ya NO es el modelo.
+
+El desafío es:
+
+arquitectura
++ orquestación
++ memoria
++ contexto
++ workflows
+
+Ahí es donde el proyecto vive o muere.
+
+Puedes darme un detalle del proyecto desglosado para pedirle a opencode todo esto en diferentes sesione y que pueda avanzar en concretar de forma autonomo este proyecto 
+Plan Maestro para Construir tu Plataforma Multi-Agente Local con OpenCode
+
+La clave para que OpenCode realmente pueda avanzar “solo” es:
+
+dividir el proyecto en sistemas independientes
++ contratos claros
++ objetivos pequeños
++ documentación persistente
+
+NO debes pedir:
+
+"crea toda la plataforma"
+
+Debes hacer que OpenCode trabaje como un equipo de desarrollo real.
+
+1. Estructura General del Proyecto
+Nombre sugerido
+astrik-ai-platform
+Estructura inicial del repositorio
+astrik-ai-platform/
+│
+├── orchestrator/
+├── agents/
+├── runtimes/
+├── memory/
+├── infrastructure/
+├── frontend/
+├── shared/
+├── docs/
+├── prompts/
+├── workflows/
+├── scripts/
+├── deployments/
+└── tests/
+2. Orden REAL de Construcción
+FASE 0 — FOUNDATION
+
+Primero se crea:
+
+arquitectura
+convenciones
+contratos
+workflows
+
+SIN escribir lógica compleja.
+
+SESIÓN 1 — Arquitectura General
+Objetivo
+
+Hacer que OpenCode diseñe toda la arquitectura.
+
+Prompt para OpenCode
+Eres el arquitecto principal del proyecto Astrik AI Platform.
+
+Necesito diseñar una plataforma multi-agente local tipo Claude Cowork.
+
+Objetivos:
+- 100% local
+- multiagente
+- múltiples modelos locales
+- workflows autónomos
+- soporte Docker/Kubernetes
+- memoria persistente
+- event-driven
+
+Necesito que generes:
+
+1. Arquitectura completa
+2. Módulos principales
+3. Comunicación entre servicios
+4. Diseño de APIs
+5. Estructura del monorepo
+6. Estrategia de memoria
+7. Sistema de agentes
+8. Diseño de orquestación
+9. Diagramas
+10. Riesgos técnicos
+
+NO implementes código todavía.
+
+Guardar todo en /docs/architecture
+Resultado esperado
+docs/architecture/
+ ├── overview.md
+ ├── services.md
+ ├── memory.md
+ ├── agents.md
+ ├── workflows.md
+ └── diagrams.md
+3. SESIÓN 2 — Estándares Globales
+Objetivo
+
+Evitar caos futuro.
+
+Prompt
+Crear estándares globales para el proyecto.
+
+Generar:
+
+1. Convenciones de carpetas
+2. Estándares Python
+3. Convenciones Docker
+4. Logging
+5. Manejo de errores
+6. Async standards
+7. Configuración YAML
+8. Secrets management
+9. Convenciones de APIs
+10. Naming conventions
+
+Guardar en:
+docs/standards/
+4. SESIÓN 3 — Diseño del Sistema de Agentes
+Objetivo
+
+Diseñar agentes especializados.
+
+Prompt
+Diseña el sistema de agentes especializados.
+
+Necesito:
+- definición de cada agente
+- responsabilidades
+- herramientas disponibles
+- memoria accesible
+- permisos
+- eventos que consume
+- eventos que publica
+- modelos recomendados
+
+Agentes mínimos:
+- planner
+- architect
+- backend
+- frontend
+- devops
+- qa
+- security
+- documentation
+- research
+
+Guardar en:
+docs/agents/
+Resultado esperado
+agent:
+  name: backend-agent
+  role: backend development
+  tools:
+    - filesystem
+    - git
+    - docker
+  models:
+    - deepseek-coder
+5. SESIÓN 4 — Diseño de Orquestación
+Objetivo
+
+Crear el “cerebro”.
+
+Prompt
+Diseña el sistema de orquestación central.
+
+Debe incluir:
+
+- task scheduler
+- workflow engine
+- event bus
+- agent routing
+- model routing
+- retry system
+- task state machine
+- distributed execution
+- queue architecture
+- observabilidad
+
+Usar:
+- FastAPI
+- NATS
+- Redis
+- PostgreSQL
+
+NO implementar aún.
+Guardar en:
+docs/orchestrator/
+6. SESIÓN 5 — Diseño de Memoria
+Objetivo
+
+Resolver el problema más difícil:
+contexto persistente.
+
+Prompt
+Diseña el sistema de memoria del proyecto.
+
+Debe incluir:
+
+- short term memory
+- long term memory
+- vector memory
+- project memory
+- git indexing
+- embeddings
+- RAG
+- chunking strategy
+- retrieval ranking
+- memory lifecycle
+
+Tecnologías:
+- Qdrant
+- PostgreSQL
+- Redis
+
+Guardar en:
+docs/memory/
+7. SESIÓN 6 — Infraestructura Base
+Objetivo
+
+Crear Docker + networking + servicios base.
+
+Prompt
+Implementar la infraestructura base.
+
+Crear:
+- docker-compose
+- networking
+- volumes
+- healthchecks
+- environment management
+- base services
+
+Servicios:
+- redis
+- postgres
+- qdrant
+- nats
+- ollama
+
+Todo modular.
+
+Guardar en:
+infrastructure/
+Resultado esperado
+infrastructure/
+ ├── docker/
+ ├── compose/
+ ├── monitoring/
+ └── scripts/
+8. SESIÓN 7 — Runtime de Modelos
+Objetivo
+
+Integrar modelos locales.
+
+Prompt
+Implementar el runtime de modelos locales.
+
+Necesito:
+- integración Ollama
+- integración llama.cpp
+- model registry
+- model routing
+- health monitoring
+- model metadata
+- auto loading
+- quantization support
+
+Modelos:
+- Hermes
+- DeepSeek
+- Qwen
+- Phi
+
+Guardar en:
+runtimes/
+9. SESIÓN 8 — Orchestrator Core
+Objetivo
+
+Construir el núcleo.
+
+Prompt
+Implementar el Orchestrator Core.
+
+Funciones:
+- crear tareas
+- asignar agentes
+- manejar workflows
+- manejar estados
+- retries
+- logs
+- métricas
+
+Usar:
+- FastAPI
+- asyncio
+- Redis
+- NATS
+
+Guardar en:
+orchestrator/
+10. SESIÓN 9 — Planner Agent
+Objetivo
+
+Crear el primer agente funcional.
+
+Prompt
+Implementar planner-agent.
+
+Debe:
+- recibir objetivos
+- dividir tareas
+- crear DAGs
+- priorizar
+- generar subtareas
+- asignar agentes
+
+Usar Hermes como modelo principal.
+
+Guardar en:
+agents/planner/
+11. SESIÓN 10 — Backend Agent
+Prompt
+Implementar backend-agent.
+
+Debe:
+- generar APIs
+- generar schemas
+- manejar PostgreSQL
+- crear tests
+- usar FastAPI
+
+Modelo:
+DeepSeek-Coder
+
+Guardar en:
+agents/backend/
+12. SESIÓN 11 — Memory Engine
+Objetivo
+
+RAG completo.
+
+Prompt
+Implementar memory engine.
+
+Funciones:
+- embeddings
+- vector indexing
+- semantic search
+- git indexing
+- chunk retrieval
+- context compression
+
+Guardar en:
+memory/
+13. SESIÓN 12 — Event Bus
+Objetivo
+
+Comunicación entre agentes.
+
+Prompt
+Implementar sistema de eventos.
+
+Usar NATS.
+
+Debe soportar:
+- publish
+- subscribe
+- task events
+- workflow events
+- logs
+- monitoring
+
+Guardar en:
+shared/events/
+14. SESIÓN 13 — QA System
+Objetivo
+
+Validación automática.
+
+Prompt
+Implementar qa-agent.
+
+Funciones:
+- unit tests
+- integration tests
+- linting
+- static analysis
+- security scan
+
+Guardar en:
+agents/qa/
+15. SESIÓN 14 — DevOps Agent
+Objetivo
+
+Deploy automático.
+
+Prompt
+Implementar devops-agent.
+
+Funciones:
+- docker builds
+- compose generation
+- k3s deployment
+- CI/CD
+- monitoring setup
+
+Guardar en:
+agents/devops/
+16. SESIÓN 15 — Dashboard
+Objetivo
+
+Control visual.
+
+Prompt
+Crear dashboard web.
+
+Debe mostrar:
+- agentes activos
+- workflows
+- logs
+- modelos cargados
+- uso GPU
+- tareas
+- memoria
+
+Usar:
+- Next.js
+- Tailwind
+- WebSockets
+
+Guardar en:
+frontend/
+17. SESIÓN 16 — Sistema Autónomo Completo
+Objetivo
+
+Conectar TODO.
+
+Prompt
+Integrar todos los servicios.
+
+Objetivo:
+- workflows completos
+- agentes colaborativos
+- memoria compartida
+- observabilidad
+- retries
+- persistencia
+
+Crear:
+- scripts de arranque
+- documentación
+- pruebas end-to-end
+18. Cómo Trabajar REALMENTE en OpenCode
+Regla de oro
+
+Cada sesión:
+
+1 objetivo
+1 módulo
+1 responsabilidad
+NO hacer
+20 cosas juntas
+SÍ hacer
+1 módulo funcional completo
+19. Cómo evitar que OpenCode destruya el proyecto
+OBLIGATORIO
+Crear:
+CLAUDE.md
+ARCHITECTURE.md
+CONTRIBUTING.md
+CLAUDE.md recomendado
+# Project Rules
+
+- Nunca cambiar arquitectura sin aprobación
+- Todo async
+- Todo configurable
+- Nunca hardcodear modelos
+- Cada servicio debe tener tests
+- Cada servicio debe tener README
+- Docker obligatorio
+- APIs REST estandarizadas
+20. Cómo hacer que avance “solo”
+Lo más importante de todo
+
+Debes convertir OpenCode en:
+
+un executor
+
+NO en:
+
+un pensador absoluto
+El pensamiento arquitectónico debe venir de vos
+
+OpenCode acelera:
+
+código
+boilerplate
+integración
+tests
+documentación
+Pero vos defines:
+boundaries
+estrategia
+workflows
+diseño global
+21. Roadmap REALISTA
+Semana 1
+Arquitectura
++ infraestructura
++ runtimes
+Semana 2
+Orchestrator
++ planner-agent
++ memory engine
+Semana 3
+backend-agent
++ qa-agent
++ dashboard
+Semana 4
+autonomía
++ workflows reales
++ deploy local
+22. Mi recomendación FINAL para tu caso
+Empezar con:
+Hermes
++ DeepSeek-Coder
++ Ollama
++ FastAPI
++ Qdrant
++ Redis
++ Docker
+NO empezar con:
+Kubernetes
+cluster gigante
+multiGPU distribuido
+
+todavía.
+
+Primero lograr:
+1 workflow autónomo funcional
+
+Ejemplo:
+
+usuario pide API
+→ planner divide
+→ backend genera
+→ QA testea
+→ devops dockeriza
+→ deploy local
+Cuando eso funcione:
+
+recién ahí escalas.
+
+Ese es el punto donde el proyecto deja de ser experimental y empieza a convertirse en una verdadera plataforma multi-agente autónoma.
+
+no te pedi que me digas por donde empezar, te pedi el plan completo con las INSTRUCCIONES PARA PODER EMPEZAR pacemos a lo concreto
+PLAN COMPLETO EJECUTABLE — ASTRIK AI PLATFORM
+Sistema Multi-Agente Local Autónomo tipo Claude Cowork
+
+Esto ya es el plan operativo real para ejecutar el proyecto con OpenCode.
+
+No es teoría.
+No es conceptual.
+Es exactamente qué debes hacer, en qué orden, qué pedirle a OpenCode y qué debe producir.
+
+0. OBJETIVO FINAL DEL PROYECTO
+
+Construir una plataforma local que:
+
+ejecute múltiples agentes IA
+use múltiples modelos locales
+coordine workflows autónomos
+genere software completo
+haga testing
+despliegue proyectos
+tenga memoria persistente
+permita agregar nuevos agentes/modelos fácilmente
+1. ARQUITECTURA FINAL DEL SISTEMA
+┌──────────────────────────────────────────────┐
+│               OPENCODE UI                   │
+│      sesiones + agentes + workflows         │
+└────────────────────┬─────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────┐
+│            ORCHESTRATOR CORE                │
+│                                              │
+│ task scheduler                               │
+│ workflow engine                              │
+│ model router                                 │
+│ agent router                                 │
+│ event manager                                │
+└───────────────┬──────────────────────────────┘
+                │
+                ▼
+┌──────────────────────────────────────────────┐
+│               EVENT BUS                      │
+│                  NATS                        │
+└──────┬─────────────┬──────────────┬──────────┘
+       │             │              │
+
+       ▼             ▼              ▼
+
+┌────────────┐ ┌────────────┐ ┌────────────┐
+│ AGENTS     │ │ AGENTS     │ │ AGENTS     │
+│ backend    │ │ planner    │ │ qa         │
+└────────────┘ └────────────┘ └────────────┘
+
+                ▼
+┌──────────────────────────────────────────────┐
+│              MEMORY LAYER                    │
+│ Redis + Qdrant + PostgreSQL                  │
+└──────────────────────────────────────────────┘
+
+                ▼
+┌──────────────────────────────────────────────┐
+│             MODEL RUNTIMES                   │
+│ Ollama + llama.cpp + vLLM                    │
+└──────────────────────────────────────────────┘
+2. ESTRUCTURA REAL DEL REPOSITORIO
+CREAR EXACTAMENTE ESTO
+astrik-ai-platform/
+│
+├── orchestrator/
+├── agents/
+│   ├── planner/
+│   ├── architect/
+│   ├── backend/
+│   ├── frontend/
+│   ├── qa/
+│   ├── security/
+│   ├── devops/
+│   ├── research/
+│   └── documentation/
+│
+├── runtimes/
+│   ├── ollama/
+│   ├── llamacpp/
+│   └── vllm/
+│
+├── memory/
+│   ├── qdrant/
+│   ├── embeddings/
+│   ├── rag/
+│   └── indexing/
+│
+├── infrastructure/
+│   ├── docker/
+│   ├── compose/
+│   ├── monitoring/
+│   └── networking/
+│
+├── frontend/
+├── shared/
+├── workflows/
+├── prompts/
+├── docs/
+├── tests/
+└── scripts/
+3. HARDWARE NECESARIO
+MÍNIMO REAL
+Recurso	Necesario
+CPU	Ryzen 9
+RAM	64GB
+GPU	RTX 4090
+SSD	2TB NVMe
+RECOMENDADO
+Recurso	Recomendado
+CPU	Threadripper
+RAM	128GB
+GPU	2× RTX 4090/5090
+SSD	4TB NVMe
+Red	10GbE
+4. SOFTWARE BASE QUE DEBES INSTALAR
+HOST
+Software	Uso
+Proxmox VE	Hypervisor
+Ubuntu Server 24.04	VMs
+Docker	Containers
+K3s	Kubernetes
+IA
+Software	Uso
+OpenCode	IDE IA
+Ollama	Modelos locales
+llama.cpp	GGUF
+vLLM	inferencia pesada
+BASES
+Software	Uso
+PostgreSQL	persistencia
+Redis	cache/contexto
+Qdrant	vector memory
+NATS	eventos
+5. MODELOS QUE DEBES USAR
+ORQUESTACIÓN
+Modelo	Uso
+Hermes 3	planner
+OpenHermes	workflows
+Nous Hermes	coordinación
+CODING
+Modelo	Uso
+DeepSeek-Coder	backend
+Qwen2.5-Coder	fullstack
+Codestral	refactor
+StarCoder2	rápido
+FAST TASKS
+Modelo	Uso
+Phi-4	tareas pequeñas
+Gemma	lightweight
+6. CONFIGURACIÓN DE OPENCODE
+CREAR WORKSPACE
+astrik-ai-platform
+CREAR CLAUDE.md
+
+Archivo:
+
+/CLAUDE.md
+
+Contenido:
+
+# GLOBAL RULES
+
+- Nunca cambiar arquitectura sin aprobación
+- Todo async
+- Docker obligatorio
+- FastAPI obligatorio
+- Configuración YAML
+- No hardcodear modelos
+- Cada módulo debe tener README
+- Cada servicio debe tener tests
+- Logging estructurado
+- APIs REST estándar
+- Event driven architecture
+- Memory-first architecture
+- Todo servicio debe ser desacoplado
+- Usar type hints
+- Modularidad obligatoria
+7. CONFIGURAR OPENCODE PARA AGENTES
+CREAR:
+/prompts/system/
+CREAR AGENTES
+planner-agent.md
+Eres planner-agent.
+
+Responsabilidades:
+- dividir tareas
+- generar DAGs
+- priorizar workflows
+- asignar agentes
+
+Nunca escribir código complejo.
+Solo coordinación.
+backend-agent.md
+Eres backend-agent.
+
+Responsabilidades:
+- FastAPI
+- PostgreSQL
+- APIs
+- async
+- testing
+
+Modelo principal:
+DeepSeek-Coder
+qa-agent.md
+Eres qa-agent.
+
+Responsabilidades:
+- unit tests
+- integration tests
+- linting
+- static analysis
+8. CONFIGURAR OLLAMA
+INSTALAR
+curl -fsSL https://ollama.com/install.sh | sh
+DESCARGAR MODELOS
+ollama pull hermes3
+ollama pull deepseek-coder
+ollama pull qwen2.5-coder
+ollama pull phi4
+9. CONFIGURAR INFRAESTRUCTURA BASE
+PROMPT PARA OPENCODE
+SESIÓN 1
+Crear la infraestructura Docker completa del proyecto.
+
+Necesito:
+
+- docker-compose modular
+- redes internas
+- healthchecks
+- persistencia
+- variables de entorno
+- volúmenes
+- observabilidad
+
+Servicios:
+- postgres
+- redis
+- qdrant
+- nats
+- ollama
+
+Guardar en:
+infrastructure/
+RESULTADO ESPERADO
+infrastructure/
+ ├── docker-compose.yml
+ ├── .env.example
+ ├── monitoring/
+ └── scripts/
+10. SESIÓN 2 — ORCHESTRATOR CORE
+PROMPT EXACTO
+Implementar orchestrator-core.
+
+Debe incluir:
+
+- FastAPI
+- scheduler
+- workflow engine
+- task state machine
+- agent router
+- model router
+- retry system
+- logs
+- metrics
+
+Usar:
+- Redis
+- PostgreSQL
+- NATS
+
+Guardar en:
+orchestrator/
+11. SESIÓN 3 — PLANNER AGENT
+PROMPT
+Implementar planner-agent.
+
+Funciones:
+- recibir objetivo
+- dividir tareas
+- generar DAG
+- priorizar
+- asignar agentes
+
+Usar Hermes como modelo principal.
+
+Guardar en:
+agents/planner/
+12. SESIÓN 4 — BACKEND AGENT
+PROMPT
+Implementar backend-agent.
+
+Debe:
+- generar APIs FastAPI
+- generar schemas
+- generar tests
+- manejar PostgreSQL
+- usar async
+
+Modelo:
+DeepSeek-Coder
+
+Guardar en:
+agents/backend/
+13. SESIÓN 5 — MEMORY ENGINE
+PROMPT
+Implementar memory-engine.
+
+Debe incluir:
+
+- embeddings
+- vector indexing
+- semantic retrieval
+- chunking
+- git indexing
+- RAG
+- context compression
+
+Usar:
+- Qdrant
+- Redis
+- PostgreSQL
+
+Guardar en:
+memory/
+14. SESIÓN 6 — EVENT BUS
+PROMPT
+Implementar event bus usando NATS.
+
+Debe soportar:
+
+- publish
+- subscribe
+- workflow events
+- agent events
+- retry events
+- monitoring
+
+Guardar en:
+shared/events/
+15. SESIÓN 7 — QA SYSTEM
+PROMPT
+Implementar qa-agent.
+
+Debe:
+- ejecutar tests
+- static analysis
+- linting
+- integration testing
+- security checks
+
+Guardar en:
+agents/qa/
+16. SESIÓN 8 — DEVOPS AGENT
+PROMPT
+Implementar devops-agent.
+
+Debe:
+- generar Dockerfiles
+- generar compose
+- deploy local
+- CI/CD
+- monitoring
+- logs
+
+Guardar en:
+agents/devops/
+17. SESIÓN 9 — DASHBOARD
+PROMPT
+Crear dashboard web.
+
+Debe mostrar:
+
+- agentes activos
+- workflows
+- modelos cargados
+- uso GPU
+- logs
+- tareas
+- métricas
+
+Usar:
+- Next.js
+- Tailwind
+- WebSockets
+
+Guardar en:
+frontend/
+18. SESIÓN 10 — AUTONOMÍA COMPLETA
+PROMPT
+Integrar todos los servicios.
+
+Objetivo:
+
+- workflows completos
+- memoria compartida
+- comunicación entre agentes
+- retries
+- persistencia
+- observabilidad
+- ejecución autónoma
+
+Crear:
+- scripts
+- documentación
+- tests E2E
+19. CONFIGURAR EL WORKFLOW AUTÓNOMO
+EJEMPLO REAL
+
+Usuario:
+
+"Crea una API CRM con auth JWT"
+EL SISTEMA DEBE HACER
+planner-agent
+    ↓
+divide tareas
+    ↓
+backend-agent
+    ↓
+genera API
+    ↓
+qa-agent
+    ↓
+testea
+    ↓
+devops-agent
+    ↓
+dockeriza
+    ↓
+deploy local
+20. CÓMO TRABAJAR EN OPENCODE
+REGLAS OBLIGATORIAS
+UNA SESIÓN = UN OBJETIVO
+
+NO mezclar.
+
+MAL
+haz backend + frontend + infra + memoria
+BIEN
+implementa memory-engine
+21. ESTRATEGIA DE MEMORIA
+SHORT TERM
+Redis
+LONG TERM
+Qdrant
+PROJECT MEMORY
+PostgreSQL
+FILE MEMORY
+Git indexed chunks
+22. CONFIGURACIÓN REAL DE MODELOS
+MODEL REGISTRY
+
+Archivo:
+
+models.yaml
+
+Contenido:
+
+planner:
+  provider: ollama
+  model: hermes3
+
+backend:
+  provider: ollama
+  model: deepseek-coder
+
+qa:
+  provider: ollama
+  model: qwen2.5-coder
+
+fast_tasks:
+  provider: ollama
+  model: phi4
+23. CONFIGURAR EVENTOS
+EVENTOS BASE
+TASK_CREATED
+TASK_ASSIGNED
+TASK_RUNNING
+TASK_COMPLETED
+TASK_FAILED
+WORKFLOW_STARTED
+WORKFLOW_FINISHED
+24. SISTEMA FINAL ESPERADO
+RESULTADO
+usuario escribe objetivo
+        ↓
+planner divide
+        ↓
+agentes trabajan
+        ↓
+memoria comparte contexto
+        ↓
+qa valida
+        ↓
+devops despliega
+        ↓
+dashboard monitorea
+25. LO MÁS IMPORTANTE DEL PROYECTO
+
+El éxito NO depende de:
+
+tener el mejor modelo
+DEPENDE DE:
+- arquitectura
+- boundaries
+- workflows
+- memoria
+- desacoplamiento
+- routing
+- eventos
+26. ORDEN EXACTO DE EJECUCIÓN
+HACER EN ESTE ORDEN
+1. infraestructura
+2. orchestrator
+3. planner-agent
+4. backend-agent
+5. memory-engine
+6. event-bus
+7. qa-agent
+8. devops-agent
+9. dashboard
+10. integración final
+27. RESULTADO FINAL REALISTA
+
+Al terminar tendrás:
+
+sistema multiagente local
+múltiples modelos funcionando
+workflows autónomos
+memoria persistente
+generación automática de software
+testing automático
+deploy automático
+dashboard operativo
+arquitectura extensible
+
+Eso ya deja de ser un experimento y se convierte en una verdadera plataforma IA autónoma local.

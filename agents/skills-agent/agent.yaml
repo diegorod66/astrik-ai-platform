@@ -1,0 +1,24 @@
+name: skills-agent
+version: 1.0.0
+description: >
+  Agente especializado en buscar, evaluar, instalar, probar y documentar herramientas externas y librerias para el proyecto
+model: hermes3
+runtime: llamacpp
+permissions:
+  - filesystem:write
+  - filesystem:read
+  - network:http
+events:
+  consumes:
+    - SKILL_REQUESTED
+  publishes:
+    - SKILL_INSTALLED
+    - SKILL_FAILED
+tools:
+  - filesystem
+  - network
+  - git
+dependencies:
+  - pyyaml
+  - requests
+  - beautifulsoup4
