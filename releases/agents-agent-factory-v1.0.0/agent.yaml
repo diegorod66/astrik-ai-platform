@@ -1,0 +1,22 @@
+name: agent-factory
+version: 1.0.0
+description: >
+  Meta-agente constructor de agentes. Crea, valida y gestiona
+  la estructura estandarizada de nuevos agentes en el sistema.
+model: hermes3
+runtime: llamacpp
+permissions:
+  - filesystem:write
+  - filesystem:read
+events:
+  consumes:
+    - AGENT_CREATE_REQUESTED
+  publishes:
+    - AGENT_CREATED
+    - AGENT_CREATE_FAILED
+tools:
+  - filesystem
+  - template_engine
+dependencies:
+  - pyyaml
+  - pydantic

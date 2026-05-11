@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'orchestrator'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+
+  - job_name: 'nats'
+    static_configs:
+      - targets: ['astrik-nats:8222']
+
+  - job_name: 'qdrant'
+    static_configs:
+      - targets: ['astrik-qdrant:6333']

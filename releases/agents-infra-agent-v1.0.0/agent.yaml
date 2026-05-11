@@ -1,0 +1,23 @@
+name: infra-agent
+version: 1.0.0
+description: >
+  Agente especializado en construir y gestionar toda la infraestructura Docker del proyecto: servicios, redes, volumenes, healthchecks, monitoreo. Gestiona PostgreSQL, Redis, Qdrant, NATS y llama.cpp
+model: deepseek-coder
+runtime: llamacpp
+permissions:
+  - filesystem:write
+  - filesystem:read
+  - docker:compose
+events:
+  consumes:
+    - INFRA_BUILD_REQUESTED
+    - INFRA_SERVICE_ADD
+  publishes:
+    - INFRA_READY
+    - INFRA_SERVICE_RUNNING
+tools:
+  - filesystem
+  - docker
+  - shell
+dependencies:
+  - pyyaml

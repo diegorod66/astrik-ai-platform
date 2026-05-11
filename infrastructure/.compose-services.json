@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-05-11T02:02:48.958492",
+  "services": [
+    "postgres",
+    "redis",
+    "qdrant",
+    "nats"
+  ],
+  "compose_file": "D:\\OPENWORK\\010- PRO IA PROPIO ASTRIK\\infrastructure\\docker-compose.yml"
+}

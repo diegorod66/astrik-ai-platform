@@ -118,7 +118,7 @@ def cmd_snapshot(args):
 
     # Crear snapshot
     print(f"Creando release: {release_name}")
-    shutil.copytree(src, dest, ignore=shutil.ignores("__pycache__", ".pytest_cache", "node_modules"))
+    shutil.copytree(src, dest, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", "node_modules"))
     print(f"  Origen: {src}")
     print(f"  Destino: {dest}")
 
