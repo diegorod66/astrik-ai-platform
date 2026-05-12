@@ -1,0 +1,20 @@
+name: version-agent
+version: 1.0.0
+description: >
+  Agente de versionado continuo: snapshot, bump, tag, changelog
+model: phi4
+runtime: llamacpp
+permissions:
+  - filesystem:write
+  - filesystem:read
+events:
+  consumes:
+    - agent.version.request
+  publishes:
+    - agent.version.response
+    - agent.version.heartbeat
+tools:
+  - filesystem
+  - git
+dependencies:
+  - pyyaml
