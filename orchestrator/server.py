@@ -36,6 +36,60 @@ class DecisionRequest(BaseModel):
     decision: str
 
 
+class AgentConfigUpdate(BaseModel):
+    model: str
+
+
+AVAILABLE_MODELS = ["hermes3", "deepseek-coder", "phi4", "llama3", "mistral"]
+AGENTS = ["skills-agent", "infra-agent", "agent-factory", "version-agent"]
+
+REDIS_HOST = "redis"
+REDIS_PORT = 6379
+REDIS_DB = 0
+
+
+def _redis():
+    import redis
+    return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
+
+
+def _get_agent_model(r, agent: str) -> str:
+    val = r.get(f"agent:config:{agent}:model")
+    return val if val else "hermes3"
+
+
+@app.get("/agents/config")
+async def get_agent_config():
+    import redis as _redis_mod
+    try:
+        r = _redis()
+        keys = r.keys("agent:config:*:model")
+        agents = {}
+        for key in keys:
+            a = key.split(":")[2]
+            agents[a] = _get_agent_model(r, a)
+        return {"agents": agents, "available_models": AVAILABLE_MODELS, "default_model": "hermes3"}
+    except Exception as e:
+        return {"agents": {}, "available_models": AVAILABLE_MODELS, "default_model": "hermes3", "error": str(e)}
+
+
+@app.put("/agents/config/{agent_name}")
+async def update_agent_config(agent_name: str, payload: AgentConfigUpdate):
+    if agent_name not in AGENTS:
+        raise HTTPException(status_code=404, detail=f"Agente no encontrado: {agent_name}")
+    if payload.model not in AVAILABLE_MODELS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Modelo no valido: {payload.model}. Opciones: {AVAILABLE_MODELS}",
+        )
+    try:
+        r = _redis()
+        r.set(f"agent:config:{agent_name}:model", payload.model)
+        return {"agent": agent_name, "model": payload.model, "status": "updated"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "orchestrator"}

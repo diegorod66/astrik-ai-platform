@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from .logger import CentralizedLogger
+from .agent_config import get_agent_model
 
 NATS_URL = "nats://192.168.2.112:4222"
 HEARTBEAT_INTERVAL = 30
@@ -32,7 +33,7 @@ class AgentService(ABC):
 
     @property
     def model(self) -> str:
-        return "hermes3"
+        return get_agent_model(self.agent_name)
 
     @property
     def tools(self) -> list[str]:
@@ -40,7 +41,7 @@ class AgentService(ABC):
 
     @property
     def events_consumes(self) -> list[str]:
-        return [f"agent.{self.agent_name}.request"]
+        return [f"agent.{self.agent_name}.request", "agent.config.updated"]
 
     @property
     def events_publishes(self) -> list[str]:
@@ -94,6 +95,15 @@ class AgentService(ABC):
     async def _on_message(self, msg: Msg):
         try:
             data = json.loads(msg.data.decode())
+
+            # Handle config updates
+            if msg.subject == "agent.config.updated":
+                target = data.get("agent", "")
+                if target == self.agent_name or target == "*":
+                    await self.logger.info(f"Configuracion actualizada, recargando...")
+                    await self._publish_online()
+                return
+
             task_id = data.get("id", str(uuid.uuid4()))
             task_type = data.get("type", "unknown")
             payload = data.get("payload", {})

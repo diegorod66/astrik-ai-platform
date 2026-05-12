@@ -41,3 +41,17 @@ class OrchestratorClient:
         async with httpx.AsyncClient() as client:
             resp = await client.get(f"{self.base_url}/workflows?limit={limit}", timeout=5)
             return resp.json()
+
+    async def get_agent_config(self) -> dict:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"{self.base_url}/agents/config", timeout=5)
+            return resp.json()
+
+    async def update_agent_model(self, agent_name: str, model: str) -> dict:
+        async with httpx.AsyncClient() as client:
+            resp = await client.put(
+                f"{self.base_url}/agents/config/{agent_name}",
+                json={"model": model},
+                timeout=5,
+            )
+            return resp.json()
