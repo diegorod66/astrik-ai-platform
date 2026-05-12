@@ -73,9 +73,14 @@ class AgentService(ABC):
                 pass
 
         print(f"[{self.agent_name}] Servicio iniciado. Esperando eventos...")
+        # Mantener el event loop vivo
+        self._shutdown_event = asyncio.Event()
+        await self._shutdown_event.wait()
 
     async def stop(self):
         self._running = False
+        if hasattr(self, '_shutdown_event'):
+            self._shutdown_event.set()
         await self._publish_offline()
         for sub in self.subscriptions:
             try:

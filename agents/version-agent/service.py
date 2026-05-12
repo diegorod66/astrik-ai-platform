@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from shared.agent_service import AgentService
 import subprocess
 import json

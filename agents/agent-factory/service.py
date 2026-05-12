@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
 from shared.agent_service import AgentService
-from .src.schema import AgentSchema, AgentEvents
-from .src.generator import create_agent_structure, AGENTS_DIR
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from src.schema import AgentSchema, AgentEvents
+from src.generator import create_agent_structure, AGENTS_DIR
 
 
 class FactoryAgentService(AgentService):

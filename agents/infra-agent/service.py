@@ -1,5 +1,9 @@
+#!/usr/bin/env python3
 from shared.agent_service import AgentService
-from .src.tools import run_full_build, add_service, check_health, generate_env
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from src.tools import run_full_build, add_service, check_health, generate_env
 
 
 class InfraAgentService(AgentService):

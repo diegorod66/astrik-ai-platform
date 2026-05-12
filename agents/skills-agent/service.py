@@ -1,5 +1,9 @@
+#!/usr/bin/env python3
 from shared.agent_service import AgentService
-from .src.tools import search_github, evaluate_tool, install_tool, test_tool, run_full_pipeline
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from src.tools import search_github, evaluate_tool, install_tool, test_tool, run_full_pipeline
 
 
 class SkillsAgentService(AgentService):
