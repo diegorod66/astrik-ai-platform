@@ -56,12 +56,12 @@ SERVICE_TEMPLATES = {
         "networks": ["astrik-net"],
     },
     "qdrant": {
-        "image": "qdrant/qdrant:v1.13",
+        "image": "qdrant/qdrant:v1.13.6",
         "container_name": "astrik-qdrant",
         "ports": ["6333:6333", "6334:6334"],
         "volumes": ["qdrant_data:/qdrant/storage"],
         "healthcheck": {
-            "test": ["CMD-SHELL", "curl -sf http://localhost:6333/healthz || exit 1"],
+            "test": ["CMD-SHELL", "bash -lc \"exec 3<>/dev/tcp/127.0.0.1/6333; printf 'GET /healthz HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3\""],
             "interval": "15s",
             "retries": 5,
         },
@@ -73,7 +73,7 @@ SERVICE_TEMPLATES = {
         "ports": ["4222:4222", "8222:8222"],
         "volumes": ["nats_data:/data"],
         "healthcheck": {
-            "test": ["CMD-SHELL", "nats-server --signal healthz || exit 1"],
+            "test": ["CMD-SHELL", "wget -qO- http://localhost:8222/healthz || exit 1"],
             "interval": "15s",
             "retries": 5,
         },
@@ -85,7 +85,7 @@ SERVICE_TEMPLATES = {
             "dockerfile": "runtimes/llamacpp/Dockerfile",
         },
         "container_name": "astrik-llamacpp",
-        "ports": ["8080:8080"],
+        "ports": ["${LLAMA_PORT:-8081}:8080"],
         "volumes": [
             "llamacpp_models:/models",
             "./runtimes/llamacpp:/app",
@@ -140,7 +140,7 @@ def generate_env(services: list[str] | None = None) -> str:
         "POSTGRES_USER": "astrik",
         "POSTGRES_PASSWORD": "astrik_secret",
         "POSTGRES_DB": "astrik",
-        "POSTGRES_PORT": "5432",
+        "POSTGRES_PORT": "5433",
 
         # Redis
         "REDIS_PORT": "6379",
@@ -157,7 +157,7 @@ def generate_env(services: list[str] | None = None) -> str:
         "LLAMA_MODEL": "hermes3",
         "LLAMA_N_GPU_LAYERS": "35",
         "LLAMA_CTX_SIZE": "8192",
-        "LLAMA_PORT": "8080",
+        "LLAMA_PORT": "8081",
     }
     return "\n".join(f"{k}={v}" for k, v in env.items()) + "\n"
 

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4-devel-ubuntu22.04
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
 
 RUN apt-get update && apt-get install -y \
     build-essential cmake git curl \
@@ -15,7 +15,7 @@ RUN ln -s /llama.cpp/build/bin/server /usr/local/bin/llama-server
 VOLUME ["/models"]
 EXPOSE 8080
 
-COPY entrypoint.sh /entrypoint.sh
+COPY runtimes/llamacpp/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -36,64 +36,62 @@ def _fallback_plan(objective: str) -> list[dict]:
     plan: list[dict] = []
 
     if any(word in objective_lower for word in ["buscar", "herramienta", "github", "libreria"]):
-        plan.append(
-            {
-                "id": "task-1",
-                "title": objective,
-                "kind": "research",
-                "status": "pending",
-                "tool": "search_github",
-            }
-        )
+        plan.append({
+            "id": "task-1",
+            "title": objective,
+            "agent": "skills-agent",
+            "tool": "search",
+            "kind": "research",
+            "status": "pending",
+        })
 
     if any(word in objective_lower for word in ["instalar", "instala", "install", "configurar", "setup"]):
-        plan.append(
-            {
-                "id": f"task-{len(plan) + 1}",
-                "title": objective,
-                "kind": "install",
-                "status": "pending",
-                "tool": "skills_pipeline",
-            }
-        )
+        plan.append({
+            "id": f"task-{len(plan) + 1}",
+            "title": objective,
+            "agent": "skills-agent",
+            "tool": "pipeline",
+            "kind": "install",
+            "status": "pending",
+        })
 
     if any(word in objective_lower for word in ["infra", "docker", "compose", "postgres", "redis", "nats", "qdrant"]):
-        plan.append(
-            {
-                "id": f"task-{len(plan) + 1}",
-                "title": "Preparar infraestructura base",
-                "kind": "infra",
-                "status": "pending",
-                "tool": "generate_compose",
-            }
-        )
+        plan.append({
+            "id": f"task-{len(plan) + 1}",
+            "title": "Preparar infraestructura base",
+            "agent": "infra-agent",
+            "tool": "build",
+            "kind": "infra",
+            "status": "pending",
+        })
 
     if any(word in objective_lower for word in ["crear agente", "nuevo agente", "agent"]):
-        plan.append(
-            {
-                "id": f"task-{len(plan) + 1}",
-                "title": f"Crear agente para {_slug(objective)}",
-                "kind": "factory",
-                "status": "pending",
-                "tool": "create_agent",
-            }
-        )
+        plan.append({
+            "id": f"task-{len(plan) + 1}",
+            "title": f"Crear agente para {_slug(objective)}",
+            "agent": "agent-factory",
+            "tool": "create",
+            "kind": "factory",
+            "status": "pending",
+        })
 
     if not plan:
         plan = [
             {
                 "id": "task-1",
                 "title": objective,
+                "agent": "skills-agent",
+                "tool": "search",
                 "kind": "research",
                 "status": "pending",
-                "tool": "search_github",
             },
             {
                 "id": "task-2",
                 "title": "Preparar infraestructura base",
+                "agent": "infra-agent",
+                "tool": "build",
                 "kind": "infra",
                 "status": "pending",
-                "tool": "generate_compose",
             },
         ]
 
@@ -103,16 +101,26 @@ def _fallback_plan(objective: str) -> list[dict]:
 async def plan_objective(objective: str) -> list[dict]:
     llm = get_llm()
     prompt = f"""
-Divide el siguiente objetivo en tareas ejecutables y cortas.
+Eres un planificador de sistemas multi-agente.
+Dado un objetivo, dividelo en tareas especificas y asignale a cada una un agente y una herramienta.
+
+AGENTES DISPONIBLES:
+  - "skills-agent": tools = ["search", "install", "test", "pipeline"]
+  - "infra-agent": tools = ["build", "add_service", "health", "generate_compose", "generate_env"]
+  - "agent-factory": tools = ["create", "list", "validate"]
+  - "version-agent": tools = ["snapshot", "bump", "current"]
 
 Objetivo:
 {objective}
 
-Devuelve SOLO JSON con esta forma:
+Devuelve SOLO JSON con esta forma exacta:
 [
-  {{"id": "task-1", "title": "...", "kind": "research|install|infra|factory|release", "tool": "..."}}
+  {{"id": "task-1", "title": "descripcion corta", "agent": "skills-agent", "tool": "search", "kind": "research"}},
+  {{"id": "task-2", "title": "descripcion corta", "agent": "infra-agent", "tool": "build", "kind": "infra"}}
 ]
-""".strip()
+
+kind debe ser uno de: research, install, infra, factory, release.
+No agregues explicaciones ni markdown. Solo JSON valido.""".strip()
     try:
         response = await llm.ainvoke(prompt)
         content = response.content if isinstance(response.content, str) else str(response.content)
@@ -121,9 +129,10 @@ Devuelve SOLO JSON con esta forma:
             {
                 "id": item["id"],
                 "title": item["title"],
-                "kind": item["kind"],
+                "agent": item.get("agent", "skills-agent"),
+                "tool": item.get("tool", "search"),
+                "kind": item.get("kind", "research"),
                 "status": "pending",
-                "tool": item.get("tool", ""),
             }
             for item in data
         ]

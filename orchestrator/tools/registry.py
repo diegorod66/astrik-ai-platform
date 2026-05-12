@@ -59,3 +59,38 @@ TOOL_REGISTRY = {
     "create_agent": create_agent_tool,
     "snapshot": snapshot_tool,
 }
+
+import json
+from .nats_agent import NATSAgentTool
+
+
+def nats_invoke_skills(task_type: str, payload: dict) -> dict:
+    import asyncio
+    t = NATSAgentTool("skills-agent")
+    return asyncio.run(t.invoke(task_type, payload))
+
+
+def nats_invoke_infra(task_type: str, payload: dict) -> dict:
+    import asyncio
+    t = NATSAgentTool("infra-agent")
+    return asyncio.run(t.invoke(task_type, payload))
+
+
+def nats_invoke_factory(task_type: str, payload: dict) -> dict:
+    import asyncio
+    t = NATSAgentTool("agent-factory")
+    return asyncio.run(t.invoke(task_type, payload))
+
+
+def nats_invoke_version(task_type: str, payload: dict) -> dict:
+    import asyncio
+    t = NATSAgentTool("version-agent")
+    return asyncio.run(t.invoke(task_type, payload))
+
+
+TOOL_REGISTRY_NATS = {
+    "skills-agent": nats_invoke_skills,
+    "infra-agent": nats_invoke_infra,
+    "agent-factory": nats_invoke_factory,
+    "version-agent": nats_invoke_version,
+}

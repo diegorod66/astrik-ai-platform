@@ -1,0 +1,6 @@
+streamlit==1.43.2
+nats-py==2.9.0
+httpx==0.28.1
+asyncpg==0.30.0
+redis[hiredis]==5.2.1
+pandas==2.2.3

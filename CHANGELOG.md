@@ -2,6 +2,11 @@
 
 
 ## [v1.0.0] - 2026-05-11
+### orchestrator
+- Release inicial del componente.
+
+
+## [v1.0.0] - 2026-05-11
 ### agents/infra-agent
 - Release inicial del componente.
 

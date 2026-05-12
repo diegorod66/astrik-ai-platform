@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
+from .logger import CentralizedLogger
 
 NATS_URL = "nats://192.168.2.112:4222"
 HEARTBEAT_INTERVAL = 30
@@ -19,6 +20,7 @@ class AgentService(ABC):
         self._running = False
         self._start_time = None
         self._current_task = None
+        self.logger = CentralizedLogger(self.agent_name)
 
     @property
     @abstractmethod
@@ -54,14 +56,14 @@ class AgentService(ABC):
         self._running = True
 
         await self.nc.connect(NATS_URL)
-        print(f"[{self.agent_name}] Conectado a NATS en {NATS_URL}")
+        await self.logger.info(f"Conectado a NATS en {NATS_URL}")
 
         await self._publish_online()
 
         for subject in self.events_consumes:
             sub = await self.nc.subscribe(subject, cb=self._on_message)
             self.subscriptions.append(sub)
-            print(f"[{self.agent_name}] Escuchando en: {subject}")
+            await self.logger.info(f"Escuchando en: {subject}")
 
         asyncio.create_task(self._heartbeat_loop())
 
@@ -72,8 +74,7 @@ class AgentService(ABC):
             except NotImplementedError:
                 pass
 
-        print(f"[{self.agent_name}] Servicio iniciado. Esperando eventos...")
-        # Mantener el event loop vivo
+        await self.logger.info("Servicio iniciado. Esperando eventos...")
         self._shutdown_event = asyncio.Event()
         await self._shutdown_event.wait()
 
@@ -88,7 +89,7 @@ class AgentService(ABC):
             except Exception:
                 pass
         await self.nc.drain()
-        print(f"[{self.agent_name}] Servicio detenido.")
+        await self.logger.info("Servicio detenido.")
 
     async def _on_message(self, msg: Msg):
         try:
@@ -98,7 +99,7 @@ class AgentService(ABC):
             payload = data.get("payload", {})
             reply_to = data.get("reply_to", f"agent.{self.agent_name}.response")
 
-            print(f"[{self.agent_name}] Tarea recibida: {task_type} (id: {task_id})")
+            await self.logger.info(f"Tarea recibida: {task_type}", task_id=task_id, task_type=task_type)
             self._current_task = task_id
 
             await self.nc.publish(reply_to, json.dumps({
@@ -119,10 +120,10 @@ class AgentService(ABC):
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }).encode())
 
-            print(f"[{self.agent_name}] Tarea {task_id}: {status}")
+            await self.logger.info(f"Tarea {task_id}: {status}", task_id=task_id, status=status)
 
         except Exception as e:
-            print(f"[{self.agent_name}] Error procesando mensaje: {e}")
+            await self.logger.error(f"Error procesando mensaje: {e}", error=str(e))
             try:
                 await self.nc.publish(msg.reply, json.dumps({
                     "id": "unknown", "status": "failed",

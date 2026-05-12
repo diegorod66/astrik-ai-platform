@@ -16,6 +16,7 @@ async def planner_node(state: OrchestratorState) -> dict:
         {
             "objective": objective,
             "task_count": len(plan),
+            "plan": [{"id": t["id"], "title": t["title"], "agent": t["agent"], "tool": t["tool"]} for t in plan],
         },
     )
 
